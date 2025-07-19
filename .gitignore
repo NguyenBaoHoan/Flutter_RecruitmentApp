@@ -1,45 +1,101 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
+# Cấu hình IDE và Editor
+.idea/
+.vscode/
 .DS_Store
-.atom/
-.build/
-.buildlog/
-.history
-.svn/
-.swiftpm/
-migrate_working_dir/
-
-# IntelliJ related
 *.iml
 *.ipr
 *.iws
-.idea/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
+# Build artifacts
+/build/
 .dart_tool/
 .flutter-plugins-dependencies
+.flutter-plugins
+.packages
 .pub-cache/
-.pub/
-/build/
+.gradle/
+.cxx/
+.externalNativeBuild/
+.android/
+.ios/
+.symlinks/
+.metadata
+.classpath
+.project
+.settings/
+*.bak
+*.orig
+*.swp
+*.swo
+*.tmp
+*.log
+*.obj
+*.o
+*.so
+*.dll
+*.exe
+*.apk
+*.aab
+*.ipa
+*.app
+
+# Flutter/Dart specific
+/ios/.symlinks/
+/android/.gradle/
+/android/local.properties
+/android/key.properties
+/ios/Flutter/Generated.xcconfig
+/ios/Flutter/App.framework
+/ios/Flutter/flutter_assets/
+/ios/Runner/*.xcworkspace/
+/ios/Pods/
+/ios/.bundle/
+/ios/build/
+/ios/Runner.xcodeproj/project.xcworkspace/
+/ios/Runner.xcodeproj/xcuserdata/
+
+# Các file cache và log của Dart
+.dart_tool/
+.flutter-tool-state
+.flutter-tool-state.json
+.flutter-tool-state.json.tmp
+.flutter-tool-state.json.tmp_
+.flutter-tool-state.json.tmp_old
+.flutter-tool-state.json.old
+
+# Các file được tạo bởi Android Studio/IntelliJ
+*.iml
+.idea/
+.gradle/
+local.properties
+.DS_Store
+build/
+
+# Các file được tạo bởi Xcode
+.xcworkspace/
+.xcscmblueprint
+.build/
+*.xcodeproj/xcuserdata/
+*.xcassets/
+*.xcfilelist
+*.xcscheme
+*.ipa
+*.dSYM
+*.app
+
+# Các file cache của VS Code
+.vscode/
+.vscode-test/
+
+# Các file test coverage
 /coverage/
 
-# Symbolication related
-app.*.symbols
+# Các file snapshot của Dart
+*.snapshot
 
-# Obfuscation related
-app.*.map.json
+# Các file tạm thời của Flutter
+*.temp
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
+# Các file của các công cụ khác
+*.env
+.env
