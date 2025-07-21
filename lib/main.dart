@@ -1,7 +1,7 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Add this import for SystemChrome
-import 'package:job_finder_app/Screens/user_home_screen.dart';
+import 'package:job_finder_app/screens/home/user_home_screen.dart';
 import 'package:job_finder_app/screens/chat/chat_list_screen.dart';
 
 void main() {
