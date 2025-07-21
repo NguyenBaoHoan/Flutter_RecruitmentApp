@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:front_end_test/screens/online_cv_page.dart';
-import 'package:front_end_test/screens/my_works_page.dart';
-import 'package:front_end_test/screens/favorites_page.dart';
-import 'package:front_end_test/screens/career_expectations_page.dart';
-import 'package:front_end_test/screens/attach_cv_page.dart'; 
+import '../../../screens/profile/attach_cv_page.dart';
+import '../../../screens/profile/my_works_page.dart';
+import '../../../screens/profile/favorites_page.dart';
+import '../../../screens/profile/career_expectations_page.dart';
+import '../../../screens/profile/attach_cv_page.dart';
+import '../../../screens/profile/online_cv_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
