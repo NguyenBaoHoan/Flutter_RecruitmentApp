@@ -1,6 +1,8 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Add this import for SystemChrome
+import 'package:flutter/services.dart';
+// Import các màn hình của bạn
+import 'package:job_finder_app/screens/login/login_screen.dart'; // <-- THÊM DÒNG NÀY
 import 'package:job_finder_app/screens/home/user_home_screen.dart';
 import 'package:job_finder_app/screens/chat/chat_list_screen.dart';
 import 'package:job_finder_app/screens/choose_area/choose_area_screen.dart';
@@ -37,9 +39,14 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
+      // Bắt đầu ứng dụng với màn hình đăng nhập
       initialRoute: '/',
       routes: {
-        '/': (context) => const UserHomeScreen(), // Use HomeScreen here
+        // Route '/' sẽ trỏ đến LoginScreen
+        '/': (context) => const LoginScreen(),
+        // Tạo một route mới cho màn hình Home
+        '/home': (context) => const UserHomeScreen(),
+        // Giữ nguyên các route khác
         '/chat': (context) => const ChatListScreen(),
         '/choose-area': (context) => const ChooseAreaScreen() // 2. Thêm route mới tại đây
       },

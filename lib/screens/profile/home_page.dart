@@ -3,7 +3,6 @@ import '../../../screens/profile/attach_cv_page.dart';
 import '../../../screens/profile/my_works_page.dart';
 import '../../../screens/profile/favorites_page.dart';
 import '../../../screens/profile/career_expectations_page.dart';
-import '../../../screens/profile/attach_cv_page.dart';
 import '../../../screens/profile/online_cv_page.dart';
 
 class HomePageProfile extends StatelessWidget {

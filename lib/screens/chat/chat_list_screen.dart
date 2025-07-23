@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:job_finder_app/widgets/nav_helper.dart';
 import '../../models/chat_model.dart';
-import '../../models/chat_room.dart';
 import '../../services/chat_api_service.dart';
 import '../../services/websocket_service.dart';
 import '../../widgets/custom_tab_bar.dart';
