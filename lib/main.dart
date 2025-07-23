@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Add this import for SystemChrome
 import 'package:job_finder_app/screens/home/user_home_screen.dart';
 import 'package:job_finder_app/screens/chat/chat_list_screen.dart';
-
+import 'package:job_finder_app/screens/choose_area/choose_area_screen.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(
@@ -41,6 +41,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const UserHomeScreen(), // Use HomeScreen here
         '/chat': (context) => const ChatListScreen(),
+        '/choose-area': (context) => const ChooseAreaScreen() // 2. Thêm route mới tại đây
       },
     );
   }

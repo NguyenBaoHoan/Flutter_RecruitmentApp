@@ -6,8 +6,8 @@ import '../../../screens/profile/career_expectations_page.dart';
 import '../../../screens/profile/attach_cv_page.dart';
 import '../../../screens/profile/online_cv_page.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+class HomePageProfile extends StatelessWidget {
+  const HomePageProfile({super.key});
 
   @override
   Widget build(BuildContext context) {
