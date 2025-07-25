@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../screens/chat/chat_list_screen.dart';
 
 class MainBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -27,7 +28,15 @@ class MainBottomNavBar extends StatelessWidget {
       currentIndex: currentIndex,
       selectedItemColor: const Color(0xFF2196F3),
       unselectedItemColor: Colors.grey,
-      onTap: onTap,
+      onTap: (index) {
+        if (index == 1) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ChatListScreen()),
+          );
+        }
+        onTap(index);
+      },
       type: BottomNavigationBarType.fixed,
       showUnselectedLabels: true,
     );

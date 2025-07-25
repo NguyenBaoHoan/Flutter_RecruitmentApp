@@ -1,7 +1,12 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import '../../services/auth_service.dart';
+import '../../models/user_model.dart';
+import '../home/user_home_screen.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'auth_gate.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -11,21 +16,78 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final AuthService _authService = AuthService();
   // Biến để quản lý trạng thái của checkbox
   bool _termsAccepted = false;
   // Biến để quản lý ẩn/hiện mật khẩu
   bool _isPasswordObscured = true;
 
+  // Hàm initState() là một phương thức vòng đời của StatefulWidget,
+  // được gọi một lần duy nhất khi widget này được tạo ra lần đầu tiên.
+  // Ở đây, nó dùng để kiểm tra trạng thái đăng nhập của người dùng ngay khi màn hình đăng nhập được khởi tạo.
+  @override
+  void initState() {
+    super
+        .initState(); // Gọi hàm khởi tạo của lớp cha để đảm bảo mọi thứ được thiết lập đúng.
+    _checkLoginStatus(); // Kiểm tra xem người dùng đã đăng nhập chưa, nếu rồi thì chuyển sang màn hình chính.
+  }
+
+  void _checkLoginStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+    if (isLoggedIn) {
+      // Nếu đã đăng nhập, chuyển thẳng sang Home
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const UserHomeScreen()),
+      );
+    }
+  }
+
+  Future<void> _login() async {
+    final user = await _authService.login(
+      _emailController.text,
+      _passwordController.text,
+    );
+    if (user != null) {
+      print('Đăng nhập thành công!');
+      print('ID: ${user.id}');
+      print('Email: ${user.email}');
+      print('Name: ${user.name}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Đăng nhập thành công! Xin chào ${user.name}')),
+      );
+
+      // trước khi đăng nhập thành công:
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', true);
+      //if login success, go to home screen
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const AuthGate()),
+        (route) => false,
+      );
+      // Nếu có token, lưu thêm token
+      // await prefs.setString('token', token);
+      // TODO: Chuyển sang màn hình chính hoặc lưu user
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Đăng nhập thất bại!')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Hàm build trả về widget giao diện của màn hình đăng nhập
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: const BackButton(
-          color: Colors.black,
-        ),
+        leading: const BackButton(color: Colors.black),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -36,8 +98,6 @@ class _LoginScreenState extends State<LoginScreen> {
             children: <Widget>[
               const SizedBox(height: 20),
               // 1. Logo
-              // Thay 'assets/images/logo.png' bằng đường dẫn đến logo của bạn
-              // Hoặc dùng Icon nếu bạn không có logo
               Icon(
                 Icons.supervised_user_circle, // Icon thay thế cho logo
                 size: 80.0,
@@ -47,6 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
               // 2. Trường nhập email
               TextFormField(
+                controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   hintText: 'Vui lòng nhập Email',
@@ -65,6 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
               // 3. Trường nhập mật khẩu
               TextFormField(
+                controller: _passwordController,
                 obscureText: _isPasswordObscured,
                 decoration: InputDecoration(
                   hintText: 'Vui lòng nhập mật khẩu',
@@ -109,9 +171,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
               // 5. Nút Đăng nhập chính
               ElevatedButton(
-                onPressed: () {
-                  // TODO: Xử lý logic đăng nhập
-                },
+                onPressed: _termsAccepted ? _login : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue.shade700,
                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -158,7 +218,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     // TODO: Login with Zalo - Cần icon Zalo riêng
                     // FontAwesome không có icon Zalo, bạn có thể dùng icon khác hoặc ảnh
                   }),
-                   const SizedBox(width: 20),
+                  const SizedBox(width: 20),
                   _buildSocialButton(FontAwesomeIcons.apple, () {
                     // TODO: Login with Apple
                   }),
@@ -183,35 +243,47 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: RichText(
                       text: TextSpan(
                         style: TextStyle(
-                            fontSize: 12, color: Colors.grey.shade600),
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
                         children: [
                           const TextSpan(
-                              text: 'Bằng việc đăng nhập, tôi xác nhận đã đọc và đồng ý với '),
+                            text:
+                                'Bằng việc đăng nhập, tôi xác nhận đã đọc và đồng ý với ',
+                          ),
                           TextSpan(
                             text: 'Thỏa thuận người dùng',
-                            style: TextStyle(color: Colors.blue.shade700, decoration: TextDecoration.underline),
-                            recognizer: TapGestureRecognizer()..onTap = () {
-                              // TODO: Mở trang Thỏa thuận người dùng
-                              print('Navigate to Terms of Service');
-                            },
+                            style: TextStyle(
+                              color: Colors.blue.shade700,
+                              decoration: TextDecoration.underline,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                // TODO: Mở trang Thỏa thuận người dùng
+                                print('Navigate to Terms of Service');
+                              },
                           ),
                           const TextSpan(text: ' và '),
                           TextSpan(
                             text: 'Chính sách bảo mật',
-                             style: TextStyle(color: Colors.blue.shade700, decoration: TextDecoration.underline),
-                            recognizer: TapGestureRecognizer()..onTap = () {
-                              // TODO: Mở trang Chính sách bảo mật
-                               print('Navigate to Privacy Policy');
-                            },
+                            style: TextStyle(
+                              color: Colors.blue.shade700,
+                              decoration: TextDecoration.underline,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                // TODO: Mở trang Chính sách bảo mật
+                                print('Navigate to Privacy Policy');
+                              },
                           ),
-                           const TextSpan(text: ' của goodboss.'),
+                          const TextSpan(text: ' của goodboss.'),
                         ],
                       ),
                     ),
                   ),
                 ],
               ),
-               const SizedBox(height: 20),
+              const SizedBox(height: 20),
             ],
           ),
         ),

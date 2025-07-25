@@ -6,6 +6,9 @@ import 'package:job_finder_app/screens/login/login_screen.dart'; // <-- THÊM D�
 import 'package:job_finder_app/screens/home/user_home_screen.dart';
 import 'package:job_finder_app/screens/chat/chat_list_screen.dart';
 import 'package:job_finder_app/screens/choose_area/choose_area_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:job_finder_app/screens/login/auth_gate.dart'; // Đường dẫn tuỳ bạn đặt file
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(
@@ -23,7 +26,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Job Finder App',
+      title: 'Recruitment App',
       theme: ThemeData(
         primaryColor: const Color(0xFF0D47A1), // Your primary color
         scaffoldBackgroundColor: const Color(
@@ -39,17 +42,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
-      // Bắt đầu ứng dụng với màn hình đăng nhập
-      initialRoute: '/',
-      routes: {
-        // Route '/' sẽ trỏ đến LoginScreen
-        '/': (context) => const LoginScreen(),
-        // Tạo một route mới cho màn hình Home
-        '/home': (context) => const UserHomeScreen(),
-        // Giữ nguyên các route khác
-        '/chat': (context) => const ChatListScreen(),
-        '/choose-area': (context) => const ChooseAreaScreen() // 2. Thêm route mới tại đây
-      },
+      home: const AuthGate(), // Chạy vào AuthGate đầu tiên
     );
   }
 }

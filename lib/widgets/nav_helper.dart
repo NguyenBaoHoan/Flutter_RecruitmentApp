@@ -9,8 +9,11 @@ void handleMainNavTap(BuildContext context, int index) {
   } else if (index == 1) {
     Navigator.pushNamed(context, '/chat');
   }
-  if(index == 2){
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePageProfile()));
+  if (index == 2) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const HomePageProfile()),
+    );
   }
 }
-  // Add more cases for other indices if needed
+// Add more cases for other indices if needed

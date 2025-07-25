@@ -4,23 +4,25 @@ import '../../../screens/profile/my_works_page.dart';
 import '../../../screens/profile/favorites_page.dart';
 import '../../../screens/profile/career_expectations_page.dart';
 import '../../../screens/profile/online_cv_page.dart';
+import '../../screens/home/user_home_screen.dart';
+import '../../widgets/nav_helper.dart';
+import '../../widgets/main_bottom_nav_bar.dart';
 
 class HomePageProfile extends StatelessWidget {
   const HomePageProfile({super.key});
 
+  final int _selectedIndex = 2;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
+
         elevation: 0,
         leading: const SizedBox.shrink(), // Ẩn nút back mặc định
         title: const Text(
           'Của tôi',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         actions: [
@@ -49,7 +51,10 @@ class HomePageProfile extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
+      bottomNavigationBar: MainBottomNavBar(
+        currentIndex: _selectedIndex,
+        onTap: (index) => _onItemTapped(context, index),
+      ),
     );
   }
 
@@ -81,10 +86,7 @@ class HomePageProfile extends StatelessWidget {
             children: [
               const Text(
                 'Nguyễn Văn Nghĩa',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(width: 5),
               GestureDetector(
@@ -99,10 +101,7 @@ class HomePageProfile extends StatelessWidget {
           // Mô tả CV
           const Text(
             'CV trực tuyến',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
-            ),
+            style: TextStyle(fontSize: 16, color: Colors.grey),
           ),
         ],
       ),
@@ -141,10 +140,7 @@ class HomePageProfile extends StatelessWidget {
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.black87,
-                ),
+                style: const TextStyle(fontSize: 14, color: Colors.black87),
               ),
               const SizedBox(height: 5),
               Text(
@@ -163,7 +159,8 @@ class HomePageProfile extends StatelessWidget {
   }
 
   // Danh sách các mục điều hướng
-  Widget _buildNavigationList(BuildContext context) { // Nhận context
+  Widget _buildNavigationList(BuildContext context) {
+    // Nhận context
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Column(
@@ -197,7 +194,9 @@ class HomePageProfile extends StatelessWidget {
             () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const CareerExpectationsPage()),
+                MaterialPageRoute(
+                  builder: (context) => const CareerExpectationsPage(),
+                ),
               );
             },
           ),
@@ -212,17 +211,12 @@ class HomePageProfile extends StatelessWidget {
               );
             },
           ),
-          _buildNavigationItem(
-            context,
-            Icons.favorite_outline,
-            'Thú vị',
-            () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const FavoritesPage()),
-              );
-            },
-          ),
+          _buildNavigationItem(context, Icons.favorite_outline, 'Thú vị', () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const FavoritesPage()),
+            );
+          }),
         ],
       ),
     );
@@ -230,7 +224,11 @@ class HomePageProfile extends StatelessWidget {
 
   // Mục điều hướng đơn lẻ
   Widget _buildNavigationItem(
-      BuildContext context, IconData icon, String title, VoidCallback onTap) {
+    BuildContext context,
+    IconData icon,
+    String title,
+    VoidCallback onTap,
+  ) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
       shape: RoundedRectangleBorder(
@@ -250,60 +248,7 @@ class HomePageProfile extends StatelessWidget {
     );
   }
 
-  // Thanh điều hướng dưới cùng
-  Widget _buildBottomNavigationBar() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 2,
-            blurRadius: 5,
-            offset: const Offset(0, -3), // Đổ bóng lên trên
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-        ),
-        child: BottomNavigationBar(
-          backgroundColor: Colors.white,
-          selectedItemColor: Colors.blue,
-          unselectedItemColor: Colors.grey,
-          showSelectedLabels: true,
-          showUnselectedLabels: true,
-          type: BottomNavigationBarType.fixed, // Đảm bảo các mục không bị dịch chuyển
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              label: 'Trang chủ',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.search),
-              label: 'Tìm kiếm',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.notifications_outlined),
-              label: 'Thông báo',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              label: 'Của tôi',
-            ),
-          ],
-          currentIndex: 3, // Đặt mục "Của tôi" là mục đang chọn
-          onTap: (index) {
-            // Xử lý khi nhấn vào các mục trong bottom navigation bar
-          },
-        ),
-      ),
-    );
+  void _onItemTapped(BuildContext context, int index) {
+    handleMainNavTap(context, index);
   }
 }
