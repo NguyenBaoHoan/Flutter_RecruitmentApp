@@ -1,12 +1,12 @@
-// lib/models/job_model.dart
-
 class Job {
-  final String iconUrl; // Trong ví dụ này, chúng ta sẽ dùng icon mặc định
+  final String iconUrl;
   final String title;
   final String company;
   final String salary;
   final String location;
   final String postDate;
+  final String status;
+  final String description;
 
   Job({
     required this.iconUrl,
@@ -15,5 +15,7 @@ class Job {
     required this.salary,
     required this.location,
     required this.postDate,
+    required this.status,
+    required this.description,
   });
 }

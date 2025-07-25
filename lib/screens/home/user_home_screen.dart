@@ -5,7 +5,6 @@ import 'package:job_finder_app/widgets/main_bottom_nav_bar.dart';
 import 'package:job_finder_app/widgets/nav_helper.dart';
 import '../../../models/job_model.dart';
 import '../../../widgets/job_card.dart';
-import '../choose_area/choose_area_screen.dart';
 
 class UserHomeScreen extends StatefulWidget {
   const UserHomeScreen({Key? key}) : super(key: key);
@@ -24,6 +23,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       location: 'Bình Thạnh - Hồ Chí Minh',
       postDate: 'Hôm nay',
       iconUrl: '',
+      status: 'open',
+      description: 'Tiếp đón khách và hỗ trợ team Sale. Có cơ hội học hỏi kỹ năng truyền thông nội bộ.', // NEW
     ),
     Job(
       title: 'Chuyên Viên Kế Toán Tổng Hợp',
@@ -32,6 +33,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       location: 'Cầu Giấy - Hà Nội',
       postDate: 'Hôm nay',
       iconUrl: '',
+      status: 'open',
+      description: 'Công việc kế toán tổng hợp các khoản mục tài chính kế toán, lập báo cáo thuế định kỳ.', // NEW
     ),
     Job(
       title: 'Nhân Viên Kinh Doanh Thuốc Thủy Sản',
@@ -40,6 +43,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       location: 'Thủ Đức - Hồ Chí Minh',
       postDate: 'Hôm nay',
       iconUrl: '',
+      status: 'open',
+      description: 'Kinh doanh sản phẩm thuốc thủy sản, chăm sóc khách hàng, tư vấn kỹ thuật.', // NEW
     ),
     Job(
       title: 'Nhân Viên Kinh Doanh',
@@ -48,6 +53,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       location: 'Quận 7 - Hồ Chí Minh',
       postDate: 'Hôm qua',
       iconUrl: '',
+      status: 'open',
+      description: 'Phát triển khách hàng và triển khai các chương trình bán hàng mới.', // NEW
     ),
   ];
 
@@ -97,22 +104,12 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: Colors.grey[300]!),
             ),
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ChooseAreaScreen(),
-                  ),
-                );
-              },
-              child: Row(
-                children: const [
-                  Icon(Icons.location_on_outlined, color: Colors.black54),
-                  SizedBox(width: 8),
-                  Text('Khu vực'),
-                ],
-              ),
+            child: const Row(
+              children: [
+                Icon(Icons.location_on_outlined, color: Colors.black54),
+                SizedBox(width: 8),
+                Text('Khu vực'),
+              ],
             ),
           ),
           const Spacer(),
@@ -158,7 +155,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                 children: [
                   TextSpan(
                     text:
-                        'Sơ yếu lý lịch đã được ẩn. Mở nó ra có thể cải thiện hiệu quả tìm kiếm việc làm. ',
+                    'Sơ yếu lý lịch đã được ẩn. Mở nó ra có thể cải thiện hiệu quả tìm kiếm việc làm. ',
                   ),
                   TextSpan(
                     text: 'CV mở',
