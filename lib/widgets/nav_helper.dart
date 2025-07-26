@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:job_finder_app/screens/profile/home_page.dart';
+import 'package:job_finder_app/screens/profile/home_profile_screen.dart';
 import 'package:job_finder_app/widgets/main_bottom_nav_bar.dart';
 import 'package:job_finder_app/widgets/nav_helper.dart';
 

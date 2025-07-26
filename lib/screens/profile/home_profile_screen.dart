@@ -7,6 +7,7 @@ import '../../../screens/profile/online_cv_page.dart';
 import '../../screens/home/user_home_screen.dart';
 import '../../widgets/nav_helper.dart';
 import '../../widgets/main_bottom_nav_bar.dart';
+import '../../../screens/profile/setting_screen.dart';
 
 class HomePageProfile extends StatelessWidget {
   const HomePageProfile({super.key});
@@ -35,7 +36,10 @@ class HomePageProfile extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.settings_outlined, color: Colors.black),
             onPressed: () {
-              // Xử lý khi nhấn nút cài đặt
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingScreen()),
+              );
             },
           ),
         ],
