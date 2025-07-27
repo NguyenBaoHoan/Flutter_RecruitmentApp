@@ -35,8 +35,9 @@ dependencies:
   web_socket_channel: ^2.4.0
   country_code_picker: ^3.0.0 # Cho phép chọn mã vùng điện thoại
   font_awesome_flutter: ^10.7.0 # Cung cấp bộ icon mạng xã hội
-
   shared_preferences: ^2.0.0
+  google_sign_in: ^7.1.1
+  flutter_secure_storage: ^9.2.4 # Để lưu token an toàn
 
 dev_dependencies:
   flutter_test:
