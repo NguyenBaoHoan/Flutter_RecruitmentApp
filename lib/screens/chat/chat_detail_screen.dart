@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/chat_message.dart';
 import '../../models/chat_model.dart';
 import '../../services/chat_api_service.dart';
@@ -6,7 +8,6 @@ import '../../services/websocket_service.dart';
 
 class ChatDetailScreen extends StatefulWidget {
   final ChatModel chat;
-
   const ChatDetailScreen({Key? key, required this.chat}) : super(key: key);
 
   @override
@@ -17,150 +18,136 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
+  // Lấy instance singleton của services
   final ChatApiService _apiService = ChatApiService();
   final WebSocketService _webSocketService = WebSocketService();
 
   List<ChatMessage> _messages = [];
   bool _isLoading = true;
   String? _errorMessage;
+  int _currentUserId = 0;
 
-  // Mock current user ID (trong thực tế sẽ lấy từ authentication)
-  final int _currentUserId = 3;
+  // StreamSubscription để lắng nghe tin nhắn
+  StreamSubscription<ChatMessage>? _messageSubscription;
 
   @override
   void initState() {
     super.initState();
-    print('=== FLUTTER DEBUG ===');
-    print('ChatDetailScreen: Room ID: ${widget.chat.roomId}');
-    print('ChatDetailScreen: Participant ID: ${widget.chat.participantId}');
-    print('ChatDetailScreen: Title: ${widget.chat.title}');
-    print('ChatDetailScreen: Current User ID: $_currentUserId');
-    print('=== END FLUTTER DEBUG ===');
+    _loadUserData();
+  }
 
-    _loadChatHistory();
-    _setupWebSocket();
+  Future<void> _loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userIdString = prefs.getString('user_id');
+    if (userIdString != null) {
+      _currentUserId = int.tryParse(userIdString) ?? 0;
+    }
+
+    await _loadChatHistory();
+    _setupWebSocketListeners();
   }
 
   @override
   void dispose() {
     _messageController.dispose();
     _scrollController.dispose();
+
+    // --- SỬA ĐỔI QUAN TRỌNG ---
+    // Hủy subscription của phòng này khi thoát
+    if (widget.chat.roomId != null) {
+      _webSocketService.unsubscribeFromRoom(widget.chat.roomId!);
+    }
+    // Hủy lắng nghe stream
+    _messageSubscription?.cancel();
+
     super.dispose();
   }
 
   Future<void> _loadChatHistory() async {
     if (widget.chat.roomId == null) return;
-
     try {
       setState(() {
         _isLoading = true;
         _errorMessage = null;
       });
-
       final messages = await _apiService.getChatHistory(widget.chat.roomId!);
-
-      setState(() {
-        _messages = messages;
-        _isLoading = false;
-      });
-
-      // Scroll to bottom after loading
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _scrollToBottom();
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage = e.toString();
-        _isLoading = false;
-      });
-    }
-  }
-
-  void _setupWebSocket() {
-    print('=== WEBSOCKET CHAT DETAIL SETUP ===');
-    print('Setting up WebSocket for chat detail...');
-
-    _webSocketService.onConnected = () {
-      print('=== WEBSOCKET CHAT DETAIL CONNECTED ===');
-      print('WebSocket connected in chat detail');
-      if (widget.chat.roomId != null) {
-        print('Subscribing to room: ${widget.chat.roomId}');
-        _webSocketService.subscribeToRoom(widget.chat.roomId!);
-      } else {
-        print('Room ID is null, cannot subscribe');
+      if (mounted) {
+        setState(() {
+          _messages = messages.reversed.toList(); // Đảo ngược để hiển thị đúng
+          _isLoading = false;
+        });
       }
-      print('=== END WEBSOCKET CHAT DETAIL CONNECTED ===');
-    };
-
-    _webSocketService.onMessageReceived = (ChatMessage message) {
-      print('=== RECEIVED MESSAGE ===');
-      print('Message content: ${message.content}');
-      print('Sender ID: ${message.senderId}');
-      print('Recipient ID: ${message.recipientId}');
-      print('Current User ID: $_currentUserId');
-      print('=== END RECEIVED ===');
-
-      setState(() {
-        _messages.add(message);
-      });
-      _scrollToBottom();
-    };
-
-    _webSocketService.onError = (error) {
-      print('=== WEBSOCKET CHAT DETAIL ERROR ===');
-      print('WebSocket error in chat detail: $error');
-      print('=== END WEBSOCKET CHAT DETAIL ERROR ===');
-    };
-
-    _webSocketService.onDisconnected = () {
-      print('=== WEBSOCKET CHAT DETAIL DISCONNECTED ===');
-      print('WebSocket disconnected in chat detail');
-      print('=== END WEBSOCKET CHAT DETAIL DISCONNECTED ===');
-    };
-
-    print('Connecting to WebSocket...');
-    _webSocketService.connect();
-    print('=== END WEBSOCKET CHAT DETAIL SETUP ===');
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _scrollToBottom(isAnimated: false),
+      );
+    } catch (e) {
+      if (mounted)
+        setState(() {
+          _errorMessage = e.toString();
+          _isLoading = false;
+        });
+    }
   }
 
-  void _scrollToBottom() {
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
-    }
+  void _setupWebSocketListeners() {
+    // --- SỬA ĐỔI QUAN TRỌNG ---
+    if (widget.chat.roomId == null) return;
+
+    // 1. Subscribe vào phòng chat này
+    _webSocketService.subscribeToRoom(widget.chat.roomId!);
+
+    // 2. Lắng nghe tất cả tin nhắn đến
+    _messageSubscription?.cancel(); // Hủy sub cũ nếu có
+    _messageSubscription = _webSocketService.onMessageReceived.listen((
+      message,
+    ) {
+      // Chỉ xử lý tin nhắn của phòng chat hiện tại
+      if (message.chatRoomId == widget.chat.roomId) {
+        print('=== RECEIVED MESSAGE FOR THIS ROOM: ${message.content} ===');
+        if (mounted) {
+          setState(() {
+            _messages.add(message); // Thêm vào cuối danh sách
+          });
+          _scrollToBottom();
+        }
+      }
+    });
   }
 
   void _sendMessage() {
     final messageText = _messageController.text.trim();
-    if (messageText.isEmpty) return;
+    if (messageText.isEmpty || widget.chat.participantId == null) return;
 
-    final recipientId = widget.chat.participantId!;
     final message = ChatMessage(
       content: messageText,
       senderId: _currentUserId,
-      recipientId: recipientId,
+      recipientId: widget.chat.participantId!,
       messageType: 'TEXT',
+      chatRoomId: widget.chat.roomId, // Gửi cả roomId để server tiện xử lý
     );
-
-    // Thêm vào danh sách để hiển thị ngay
-    setState(() {
-       _messages.insert(0, message);
-    });
-
-    print('=== SENDING MESSAGE ===');
-    print('Message content: $messageText');
-    print('Sender ID: $_currentUserId');
-    print('Recipient ID: $recipientId');
-    print('=== END SENDING ===');
 
     _webSocketService.sendMessage(message);
     _messageController.clear();
+
     _scrollToBottom();
   }
 
+  void _scrollToBottom({bool isAnimated = true}) {
+    if (_scrollController.hasClients) {
+      final position = _scrollController.position.maxScrollExtent;
+      if (isAnimated) {
+        _scrollController.animateTo(
+          position,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      } else {
+        _scrollController.jumpTo(position);
+      }
+    }
+  }
+
+  // --- UI Code (không thay đổi nhiều) ---
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -198,7 +185,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                     ),
                   ),
                   Text(
-                    'Online', // Có thể thêm logic để check online status
+                    'Online',
                     style: TextStyle(fontSize: 12, color: Colors.green[600]),
                   ),
                 ],
@@ -215,41 +202,23 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
       ),
       body: Column(
         children: [
-          // Messages area
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _errorMessage != null
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Error: $_errorMessage',
-                          style: const TextStyle(color: Colors.red),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: _loadChatHistory,
-                          child: const Text('Retry'),
-                        ),
-                      ],
-                    ),
-                  )
+                ? Center(child: Text('Error: $_errorMessage'))
                 : ListView.builder(
                     controller: _scrollController,
                     padding: const EdgeInsets.all(16),
                     itemCount: _messages.length,
-                    reverse: true, // Thêm dòng này!
+                    // reverse: false, // Bỏ reverse để cuộn từ trên xuống
                     itemBuilder: (context, index) {
-                      final message = _messages[index]; // KHÔNG đảo index nữa!
+                      final message = _messages[index];
                       final isMe = message.senderId == _currentUserId;
                       return _buildMessageBubble(message, isMe);
                     },
                   ),
           ),
-
           // Input area
           Container(
             padding: const EdgeInsets.all(16),

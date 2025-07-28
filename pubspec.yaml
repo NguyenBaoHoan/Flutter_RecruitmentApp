@@ -35,7 +35,7 @@ dependencies:
   web_socket_channel: ^2.4.0
   country_code_picker: ^3.0.0 # Cho phép chọn mã vùng điện thoại
   font_awesome_flutter: ^10.7.0 # Cung cấp bộ icon mạng xã hội
-
+  stomp_dart_client: ^1.0.1 # <--- THÊM DÒNG NÀY
   shared_preferences: ^2.0.0
 
 dev_dependencies:

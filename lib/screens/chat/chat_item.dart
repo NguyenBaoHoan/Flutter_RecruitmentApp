@@ -27,18 +27,37 @@ class ChatItem extends StatelessWidget {
         // Hiển thị nội dung theo hàng ngang: Avatar - Nội dung - Thời gian
         child: Row(
           children: [
-            // Phần avatar người chat
-            CircleAvatar(
-              radius: 30,
-              backgroundColor: Colors.blue[100],
-              // Nếu avatarUrl không rỗng -> load ảnh từ mạng
-              backgroundImage: chat.avatarUrl.isNotEmpty
-                  ? NetworkImage(chat.avatarUrl)
-                  : null,
-              // Nếu avatarUrl rỗng -> hiển thị icon mặc định
-              child: chat.avatarUrl.isEmpty
-                  ? Icon(Icons.person, color: Colors.blue, size: 32)
-                  : null,
+            // Phần avatar người chat với online indicator
+            Stack(
+              children: [
+                CircleAvatar(
+                  radius: 30,
+                  backgroundColor: Colors.blue[100],
+                  // Nếu avatarUrl không rỗng -> load ảnh từ mạng
+                  backgroundImage: chat.avatarUrl.isNotEmpty
+                      ? NetworkImage(chat.avatarUrl)
+                      : null,
+                  // Nếu avatarUrl rỗng -> hiển thị icon mặc định
+                  child: chat.avatarUrl.isEmpty
+                      ? Icon(Icons.person, color: Colors.blue, size: 32)
+                      : null,
+                ),
+                // Online indicator
+                if (chat.isOnline)
+                  Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      width: 16,
+                      height: 16,
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2),
+                      ),
+                    ),
+                  ),
+              ],
             ),
 
             // Khoảng cách giữa avatar và nội dung chat

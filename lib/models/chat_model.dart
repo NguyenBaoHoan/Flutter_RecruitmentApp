@@ -8,6 +8,7 @@ class ChatModel {
   final bool isUnread;
   final String? roomId; // room id
   final int? participantId; // ID của người còn lại (recipient)
+  final bool isOnline; // Online status
 
   ChatModel({
     required this.avatarUrl,
@@ -17,6 +18,7 @@ class ChatModel {
     this.isUnread = false,
     this.roomId,
     this.participantId,
+    this.isOnline = false,
   });
 
   // Factory constructor để tạo từ ChatRoom
@@ -39,6 +41,7 @@ class ChatModel {
       isUnread: false,
       roomId: room.id,
       participantId: participantId,
+      isOnline: false, // Default to offline for now
     );
   }
 

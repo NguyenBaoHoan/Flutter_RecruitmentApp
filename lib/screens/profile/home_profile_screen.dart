@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../screens/profile/attach_cv_page.dart';
 import '../../../screens/profile/my_works_page.dart';
 import '../../../screens/profile/favorites_page.dart';
@@ -9,10 +10,32 @@ import '../../widgets/nav_helper.dart';
 import '../../widgets/main_bottom_nav_bar.dart';
 import '../../../screens/profile/setting_screen.dart';
 
-class HomePageProfile extends StatelessWidget {
+class HomePageProfile extends StatefulWidget {
   const HomePageProfile({super.key});
 
+  @override
+  State<HomePageProfile> createState() => _HomePageProfileState();
+}
+
+class _HomePageProfileState extends State<HomePageProfile> {
   final int _selectedIndex = 2;
+  String _userName = 'Người dùng';
+  String _userEmail = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _userName = prefs.getString('user_name') ?? 'Người dùng';
+      _userEmail = prefs.getString('user_email') ?? '';
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,9 +111,12 @@ class HomePageProfile extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
-                'Nguyễn Văn Nghĩa',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              Text(
+                _userName,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(width: 5),
               GestureDetector(

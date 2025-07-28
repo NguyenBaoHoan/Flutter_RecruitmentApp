@@ -1,188 +1,142 @@
+import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
-import 'package:web_socket_channel/web_socket_channel.dart';
-import 'package:web_socket_channel/status.dart' as status;
+import 'package:stomp_dart_client/stomp.dart';
+import 'package:stomp_dart_client/stomp_config.dart';
+import 'package:stomp_dart_client/stomp_frame.dart';
+import 'package:stomp_dart_client/stomp_handler.dart';
 import '../models/chat_message.dart';
 
 class WebSocketService {
-  static const String _baseUrl =
-      'ws://10.0.2.2:8080/ws'; // Thay bằng IP của bạn
-  WebSocketChannel? _channel;
-  bool _isConnected = false;
-
-  // Callbacks
-  Function(ChatMessage)? onMessageReceived;
-  Function(String)? onError;
-  Function()? onConnected;
-  Function()? onDisconnected;
-
-  // Singleton pattern
+  // --- Singleton Pattern ---
   static final WebSocketService _instance = WebSocketService._internal();
   factory WebSocketService() => _instance;
   WebSocketService._internal();
 
+  // --- Stomp Client ---
+  StompClient? _stompClient;
+  bool _isConnected = false;
+
+  // --- Callbacks ---
+  // Sử dụng StreamController để nhiều nơi có thể lắng nghe cùng lúc
+  final StreamController<ChatMessage> _messageController =
+      StreamController.broadcast();
+  Stream<ChatMessage> get onMessageReceived => _messageController.stream;
+
+  Function(String)? onError;
+  Function()? onConnected;
+  Function()? onDisconnected;
+
+  // --- Trạng thái kết nối ---
   bool get isConnected => _isConnected;
 
-  // Kết nối WebSocket
-  Future<void> connect() async {
-    print('=== WEBSOCKET CONNECT DEBUG ===');
-    print('Connecting to: $_baseUrl');
+  // --- Quản lý các subscription ---
+  // Key là destination (vd: /topic/rooms/1_2), value là hàm un-subscribe
+  final Map<String, StompUnsubscribe> _subscriptions = {};
 
-    try {
-      _channel = WebSocketChannel.connect(Uri.parse(_baseUrl));
-      _isConnected = true;
-      print('WebSocket connection established');
-
-      // Lắng nghe tin nhắn từ server
-      _channel!.stream.listen(
-        (message) {
-          _handleMessage(message);
-        },
-        onError: (error) {
-          print('=== WEBSOCKET CONNECTION ERROR ===');
-          print('WebSocket error: $error');
-          print('=== END WEBSOCKET CONNECTION ERROR ===');
-          _isConnected = false;
-          onError?.call('WebSocket error: $error');
-        },
-        onDone: () {
-          print('=== WEBSOCKET CONNECTION DONE ===');
-          print('WebSocket connection closed');
-          print('=== END WEBSOCKET CONNECTION DONE ===');
-          _isConnected = false;
-          onDisconnected?.call();
-        },
-      );
-
-      print('WebSocket listeners set up');
-      onConnected?.call();
-      print('=== END WEBSOCKET CONNECT DEBUG ===');
-    } catch (e) {
-      print('=== WEBSOCKET CONNECT ERROR ===');
-      print('Failed to connect: $e');
-      print('=== END WEBSOCKET CONNECT ERROR ===');
-      _isConnected = false;
-      onError?.call('Failed to connect: $e');
-    }
-  }
-
-  // Xử lý tin nhắn nhận được
-  void _handleMessage(dynamic message) {
-    print('=== WEBSOCKET RECEIVE DEBUG ===');
-    print('Raw message received: $message');
-    print('Message type: ${message.runtimeType}');
-
-    try {
-      if (message is String) {
-        // Parse STOMP frame hoặc JSON message
-        if (message.startsWith('MESSAGE')) {
-          print('Processing STOMP MESSAGE frame');
-          // STOMP MESSAGE frame
-          final lines = message.split('\n');
-          String? body;
-          for (int i = 0; i < lines.length; i++) {
-            if (lines[i].isEmpty && i + 1 < lines.length) {
-              body = lines[i + 1];
-              break;
-            }
-          }
-
-          if (body != null) {
-            print('STOMP body found: $body');
-            final jsonData = json.decode(body);
-            final chatMessage = ChatMessage.fromJson(jsonData);
-            print('Parsed ChatMessage: ${chatMessage.toJson()}');
-            onMessageReceived?.call(chatMessage);
-          } else {
-            print('No STOMP body found');
-          }
-        } else {
-          print('Processing direct JSON message');
-          // JSON message trực tiếp
-          final jsonData = json.decode(message);
-          final chatMessage = ChatMessage.fromJson(jsonData);
-          print('Parsed ChatMessage: ${chatMessage.toJson()}');
-          onMessageReceived?.call(chatMessage);
-        }
-      } else {
-        print('Message is not a String: ${message.runtimeType}');
-      }
-    } catch (e) {
-      print('=== WEBSOCKET RECEIVE ERROR ===');
-      print('Error parsing message: $e');
-      print('=== END WEBSOCKET RECEIVE ERROR ===');
-      onError?.call('Error parsing message: $e');
-    }
-    print('=== END WEBSOCKET RECEIVE DEBUG ===');
-  }
-
-  // Gửi tin nhắn
-  void sendMessage(ChatMessage message) {
-    if (!_isConnected || _channel == null) {
-      print('=== WEBSOCKET SEND ERROR ===');
-      print(
-        'WebSocket not connected. Connected: $_isConnected, Channel: ${_channel != null}',
-      );
-      print('=== END WEBSOCKET SEND ERROR ===');
-      onError?.call('WebSocket not connected');
+  void connect() {
+    if (_isConnected) {
+      print("WebSocket is already connected.");
       return;
     }
 
-    try {
-      // Tạo STOMP SEND frame
-      final jsonData = json.encode(message.toJson());
-      final stompFrame =
-          'SEND\ndestination:/app/chat.sendMessage\ncontent-type:application/json\n\n$jsonData\u0000';
+    print("Connecting to WebSocket...");
+    _stompClient = StompClient(
+      config: StompConfig(
+        url: 'ws://10.0.2.2:8080/ws', // Thay bằng IP của bạn nếu cần
+        onConnect: _onConnectCallback,
+        onDisconnect: _onDisconnectCallback,
+        onWebSocketError: (dynamic error) {
+          print("WebSocket Error: $error");
+          _isConnected = false;
+          onError?.call(error.toString());
+        },
+        onStompError: (StompFrame frame) {
+          print("STOMP Error: ${frame.body}");
+          onError?.call(frame.body ?? 'STOMP Error');
+        },
+      ),
+    );
 
-      print('=== WEBSOCKET SEND DEBUG ===');
-      print('WebSocket connected: $_isConnected');
-      print('Message object: ${message.toJson()}');
-      print('Message JSON: $jsonData');
-      print('STOMP Frame length: ${stompFrame.length}');
-      print('Destination: /app/chat.sendMessage');
-      print('=== END WEBSOCKET SEND DEBUG ===');
-
-      _channel!.sink.add(stompFrame);
-
-      print('=== WEBSOCKET SEND SUCCESS ===');
-      print('Message sent successfully via WebSocket');
-      print('=== END WEBSOCKET SEND SUCCESS ===');
-    } catch (e) {
-      print('=== WEBSOCKET SEND ERROR ===');
-      print('Error sending message: $e');
-      print('=== END WEBSOCKET SEND ERROR ===');
-      onError?.call('Error sending message: $e');
-    }
+    _stompClient!.activate();
   }
 
-  // Subscribe vào topic
-  void subscribeToRoom(String roomId) {
-    if (!_isConnected || _channel == null) {
-      onError?.call('WebSocket not connected');
-      return;
-    }
-
-    try {
-      final subscribeFrame =
-          'SUBSCRIBE\nid:sub-$roomId\ndestination:/topic/rooms/$roomId\n\n\u0000';
-      _channel!.sink.add(subscribeFrame);
-    } catch (e) {
-      onError?.call('Error subscribing: $e');
-    }
+  void _onConnectCallback(StompFrame frame) {
+    _isConnected = true;
+    print("WebSocket connected successfully.");
+    onConnected?.call();
   }
 
-  // Ngắt kết nối
-  void disconnect() {
-    if (_channel != null) {
-      _channel!.sink.close(status.goingAway);
-      _channel = null;
-    }
+  void _onDisconnectCallback(StompFrame frame) {
     _isConnected = false;
+    print("WebSocket disconnected.");
+    _subscriptions.clear(); // Xóa tất cả subscription khi mất kết nối
     onDisconnected?.call();
   }
 
-  // Dispose
-  void dispose() {
-    disconnect();
+  void subscribeToRoom(String roomId) {
+    if (!_isConnected || _stompClient == null) {
+      print("Cannot subscribe, WebSocket is not connected.");
+      return;
+    }
+
+    final destination = '/topic/rooms/$roomId';
+
+    // Nếu đã subscribe rồi thì không làm lại
+    if (_subscriptions.containsKey(destination)) {
+      print("Already subscribed to $destination");
+      return;
+    }
+
+    print("Subscribing to $destination");
+    final unsubscribeCallback = _stompClient!.subscribe(
+      destination: destination,
+      callback: (frame) {
+        if (frame.body != null) {
+          try {
+            final jsonData = json.decode(frame.body!);
+            final chatMessage = ChatMessage.fromJson(jsonData);
+            _messageController.add(chatMessage); // Đẩy message vào stream
+          } catch (e) {
+            print("Error parsing message: $e");
+          }
+        }
+      },
+    );
+    // Lưu lại hàm unsubscribe để có thể hủy sau này
+    _subscriptions[destination] = unsubscribeCallback;
   }
+
+  void unsubscribeFromRoom(String roomId) {
+    final destination = '/topic/rooms/$roomId';
+    if (_subscriptions.containsKey(destination)) {
+      print("Unsubscribing from $destination");
+      // Gọi hàm hủy đăng ký
+      _subscriptions[destination]!();
+      // Xóa khỏi danh sách đã đăng ký
+      _subscriptions.remove(destination);
+    }
+  }
+
+  void sendMessage(ChatMessage message) {
+    if (!_isConnected || _stompClient == null) {
+      print("Cannot send message, WebSocket is not connected.");
+      return;
+    }
+
+    _stompClient!.send(
+      destination: '/app/chat.sendMessage',
+      body: json.encode(message.toJson()),
+    );
+    print("Message sent to /app/chat.sendMessage");
+  }
+
+  void disconnect() {
+    if (_stompClient != null) {
+      _stompClient!.deactivate();
+    }
+    _isConnected = false;
+    print("WebSocket service deactivated.");
+  }
+
+  // Không cần dispose Singleton, nhưng có thể thêm hàm reset nếu cần
 }

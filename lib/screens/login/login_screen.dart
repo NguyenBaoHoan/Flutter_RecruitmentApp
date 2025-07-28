@@ -60,18 +60,19 @@ class _LoginScreenState extends State<LoginScreen> {
         SnackBar(content: Text('Đăng nhập thành công! Xin chào ${user.name}')),
       );
 
-      // trước khi đăng nhập thành công:
+      // Lưu thông tin đăng nhập và thông tin người dùng
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('isLoggedIn', true);
+      await prefs.setString('user_name', user.name);
+      await prefs.setString('user_email', user.email);
+      await prefs.setString('user_id', user.id.toString());
+
       //if login success, go to home screen
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const AuthGate()),
         (route) => false,
       );
-      // Nếu có token, lưu thêm token
-      // await prefs.setString('token', token);
-      // TODO: Chuyển sang màn hình chính hoặc lưu user
     } else {
       ScaffoldMessenger.of(
         context,
