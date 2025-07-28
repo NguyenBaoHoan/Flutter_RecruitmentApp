@@ -5,6 +5,7 @@ import 'package:job_finder_app/widgets/main_bottom_nav_bar.dart';
 import 'package:job_finder_app/widgets/nav_helper.dart';
 import '../../../models/job_model.dart';
 import '../../../widgets/job_card.dart';
+import '../choose_area/choose_area_screen.dart';
 
 class UserHomeScreen extends StatefulWidget {
   const UserHomeScreen({Key? key}) : super(key: key);
@@ -104,12 +105,22 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: Colors.grey[300]!),
             ),
-            child: const Row(
-              children: [
-                Icon(Icons.location_on_outlined, color: Colors.black54),
-                SizedBox(width: 8),
-                Text('Khu vực'),
-              ],
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ChooseAreaScreen(),
+                  ),
+                );
+              },
+              child: Row(
+                children: const [
+                  Icon(Icons.location_on_outlined, color: Colors.black54),
+                  SizedBox(width: 8),
+                  Text('Khu vực'),
+                ],
+              ),
             ),
           ),
           const Spacer(),
