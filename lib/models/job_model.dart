@@ -1,5 +1,3 @@
-// lib/models/job_model.dart
-
 class Job {
   final String title;
   final String salary;
