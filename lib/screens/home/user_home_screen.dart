@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:job_finder_app/widgets/main_bottom_nav_bar.dart';
 import 'package:job_finder_app/widgets/nav_helper.dart';
 import '../../../models/job_model.dart';
-import '../../../widgets/job_card.dart';
+import '../../widgets/job_detail/job_card.dart';
 import '../choose_area/choose_area_screen.dart';
+import '../../screens/job_detail/job_detail_screen.dart';
 
 class UserHomeScreen extends StatefulWidget {
   const UserHomeScreen({Key? key}) : super(key: key);
@@ -19,35 +20,75 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   final List<Job> jobs = [
     Job(
       title: 'Nhân Viên Lễ Tân Kiêm Sale',
-      company: 'CÔNG TY CỔ PHẦN ĐẦU TƯ XÂY DỰNG BẤT ĐỘNG SẢN HOÀNG TRIỀU',
+      companyName: 'CÔNG TY CỔ PHẦN ĐẦU TƯ XÂY DỰNG BẤT ĐỘNG SẢN HOÀNG TRIỀU',
       salary: '10-12 Triệu',
       location: 'Bình Thạnh - Hồ Chí Minh',
-      postDate: 'Hôm nay',
-      iconUrl: '',
+      postedDate: 'Hôm nay',
+      companyLogoAsset: '',
+      experience: '1-3 năm',
+      educationLevel: 'Cao đẳng',
+      jobType: 'Toàn thời gian',
+      description: ['Mô tả công việc'],
+      requirements: ['Yêu cầu công việc'],
+      benefits: ['Phúc lợi'],
+      workAddress: 'Bình Thạnh - Hồ Chí Minh',
+      locationCompany: 'Bình Thạnh - Hồ Chí Minh',
+      companySize: '50-100 nhân viên',
+      companyIndustry: 'Bất động sản',
     ),
     Job(
       title: 'Chuyên Viên Kế Toán Tổng Hợp',
-      company: 'CÔNG TY CỔ PHẦN CÔNG NGHỆ VÀ DỊCH VỤ DỮ LIỆU SỐ TDS',
+      companyName: 'CÔNG TY CỔ PHẦN CÔNG NGHỆ VÀ DỊCH VỤ DỮ LIỆU SỐ TDS',
       salary: '18-20 Triệu',
       location: 'Cầu Giấy - Hà Nội',
-      postDate: 'Hôm nay',
-      iconUrl: '',
+      postedDate: 'Hôm nay',
+      companyLogoAsset: '',
+      experience: '3-5 năm',
+      educationLevel: 'Đại học',
+      jobType: 'Toàn thời gian',
+      description: ['Mô tả công việc'],
+      requirements: ['Yêu cầu công việc'],
+      benefits: ['Phúc lợi'],
+      workAddress: 'Cầu Giấy - Hà Nội',
+      locationCompany: 'Cầu Giấy - Hà Nội',
+      companySize: '100-200 nhân viên',
+      companyIndustry: 'Công nghệ',
     ),
     Job(
       title: 'Nhân Viên Kinh Doanh Thuốc Thủy Sản',
-      company: 'CÔNG TY TNHH HÓA CHẤT THỊNH THỊNH',
+      companyName: 'CÔNG TY TNHH HÓA CHẤT THỊNH THỊNH',
       salary: 'Thỏa thuận',
       location: 'Thủ Đức - Hồ Chí Minh',
-      postDate: 'Hôm nay',
-      iconUrl: '',
+      postedDate: 'Hôm nay',
+      companyLogoAsset: '',
+      experience: '1-3 năm',
+      educationLevel: 'Cao đẳng',
+      jobType: 'Toàn thời gian',
+      description: ['Mô tả công việc'],
+      requirements: ['Yêu cầu công việc'],
+      benefits: ['Phúc lợi'],
+      workAddress: 'Thủ Đức - Hồ Chí Minh',
+      locationCompany: 'Thủ Đức - Hồ Chí Minh',
+      companySize: '50-100 nhân viên',
+      companyIndustry: 'Hóa chất',
     ),
     Job(
       title: 'Nhân Viên Kinh Doanh',
-      company: 'CÔNG TY TNHH FLUMA TECH',
+      companyName: 'CÔNG TY TNHH FLUMA TECH',
       salary: 'Thỏa thuận',
       location: 'Quận 7 - Hồ Chí Minh',
-      postDate: 'Hôm qua',
-      iconUrl: '',
+      postedDate: 'Hôm qua',
+      companyLogoAsset: '',
+      experience: '1-3 năm',
+      educationLevel: 'Cao đẳng',
+      jobType: 'Toàn thời gian',
+      description: ['Mô tả công việc'],
+      requirements: ['Yêu cầu công việc'],
+      benefits: ['Phúc lợi'],
+      workAddress: 'Quận 7 - Hồ Chí Minh',
+      locationCompany: 'Quận 7 - Hồ Chí Minh',
+      companySize: '20-50 nhân viên',
+      companyIndustry: 'Công nghệ',
     ),
   ];
 
