@@ -1,11 +1,10 @@
 // lib/widgets/job_detail/job_card.dart
 
 import 'package:flutter/material.dart';
-import '../../models/job_model.dart';
 import '../../screens/job_detail/job_detail_screen.dart';
 
 class JobCard extends StatelessWidget {
-  final Job job;
+  final Map<String, String> job;
 
   const JobCard({Key? key, required this.job}) : super(key: key);
 
@@ -57,7 +56,7 @@ class JobCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        job.title,
+                        job['title'] ?? '',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -65,7 +64,7 @@ class JobCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        job.companyName,
+                        job['company'] ?? '',
                         style: TextStyle(color: Colors.grey[600], fontSize: 13),
                       ),
                     ],
@@ -76,11 +75,11 @@ class JobCard extends StatelessWidget {
             const SizedBox(height: 16),
             Row(
               children: [
-                _buildInfoChip(job.salary, Colors.grey[200]!),
+                _buildInfoChip(job['salary'] ?? '', Colors.grey[200]!),
                 const SizedBox(width: 8),
-                _buildInfoChip(job.location, Colors.grey[200]!),
+                _buildInfoChip(job['location'] ?? '', Colors.grey[200]!),
                 const SizedBox(width: 8),
-                _buildInfoChip(job.postedDate, Colors.grey[200]!),
+                _buildInfoChip(job['postDate'] ?? '', Colors.grey[200]!),
               ],
             ),
           ],

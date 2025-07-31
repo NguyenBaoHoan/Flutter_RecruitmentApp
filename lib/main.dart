@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'screens/home/user_home_screen.dart';
 import 'screens/recruiter/recruiter_home_screen.dart';
@@ -42,7 +43,6 @@ class MyApp extends StatelessWidget {
       home: const AuthGate(), // Chạy vào AuthGate đầu tiên
       initialRoute: '/',
       routes: {
-        '/': (context) => const RecruiterHomeScreen(),
         '/recruiter-home': (context) => const RecruiterHomeScreen(),
         '/manage-jobs': (context) => const RecruiterManageJobsScreen(),
         '/chat': (context) => const ChatListScreen(),
@@ -53,10 +53,7 @@ class MyApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [
-        Locale('en'),
-        Locale('vi'),
-      ],
+      supportedLocales: const [Locale('en'), Locale('vi')],
     );
   }
 }

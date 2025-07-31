@@ -112,7 +112,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
               child: ListView.builder(
                 itemCount: jobs.length,
                 itemBuilder: (context, index) {
-                  return JobCard(job: jobs[index]);
+                  return JobCard(job: jobs[index].toMap());
                 },
               ),
             ),

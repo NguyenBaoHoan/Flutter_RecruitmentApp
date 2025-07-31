@@ -72,4 +72,24 @@ class Job {
         companySize: '20 - 99 người',
         companyIndustry: 'Truyền thông/Báo chí/Quảng cáo',
       );
+      Map<String, String> toMap() {
+        return {
+          'title': title,
+          'salary': salary,
+          'location': location,
+          'experience': experience,
+          'educationLevel': educationLevel,
+          'jobType': jobType,
+          'postedDate': postedDate,
+          'description': description.join(),
+          'requirements': requirements.join(),
+          'benefits': benefits.join(),
+          'workAddress': workAddress,
+          'companyName': companyName,
+          'companyLogoAsset': companyLogoAsset,
+          'locationCompany': locationCompany,
+          'companySize': companySize,
+          'companyIndustry': companyIndustry,
+        };
+      }
 }

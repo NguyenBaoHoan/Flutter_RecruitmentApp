@@ -1,90 +1,65 @@
 import 'package:flutter/material.dart';
-import '../../models/job_model.dart';
-import '../../data/job_database.dart';
-import '../../widgets/job_card.dart';
+import '../../widgets/job_detail/job_card.dart';
 import 'recruiter_no_data_widget.dart';
 import 'recruiter_post_job_screen.dart';
-
 
 class RecruiterManageJobsScreen extends StatefulWidget {
   const RecruiterManageJobsScreen({super.key});
 
   @override
-  State<RecruiterManageJobsScreen> createState() => _RecruiterManageJobsScreenState();
+  State<RecruiterManageJobsScreen> createState() =>
+      _RecruiterManageJobsScreenState();
 }
 
 class _RecruiterManageJobsScreenState extends State<RecruiterManageJobsScreen> {
-  final List<Job> jobs = [];
+  // Dữ liệu mẫu cứng cho UI demo
+  final List<Map<String, String>> jobs = [
+    {
+      'title': 'Backend Developer',
+      'company': 'Công ty ABC',
+      'salary': '20-30 triệu',
+      'location': 'Hà Nội',
+      'status': 'open',
+      'description': 'Phát triển API cho hệ thống.',
+    },
+    {
+      'title': 'Frontend Developer',
+      'company': 'Công ty XYZ',
+      'salary': '15-25 triệu',
+      'location': 'Hồ Chí Minh',
+      'status': 'pending',
+      'description': 'Xây dựng giao diện web.',
+    },
+  ];
   String searchQuery = '';
-  bool isLoading = true;
 
-  @override
-  void initState() {
-    super.initState();
-    _loadJobs();
-  }
+  List<Map<String, String>> getJobsByStatus(String status) =>
+      jobs.where((job) => job['status'] == status).toList();
 
-  Future<void> _loadJobs() async {
-    final list = await JobDatabase.instance.readAllJobs();
-    setState(() {
-      jobs.clear();
-      jobs.addAll(list);
-      isLoading = false;
-    });
-  }
-
-  List<Job> getJobsByStatus(String status) =>
-      jobs.where((job) => job.status == status).toList();
-
-  List<Job> filterJobs(List<Job> jobList) {
+  List<Map<String, String>> filterJobs(List<Map<String, String>> jobList) {
     if (searchQuery.isEmpty) return jobList;
     final q = searchQuery.toLowerCase();
-    return jobList.where((job) =>
-        job.title.toLowerCase().contains(q) ||
-        job.company.toLowerCase().contains(q) ||
-        job.salary.toLowerCase().contains(q) ||
-        job.location.toLowerCase().contains(q) ||
-        job.description.toLowerCase().contains(q)
-    ).toList();
+    return jobList
+        .where(
+          (job) =>
+              (job['title'] ?? '').toLowerCase().contains(q) ||
+              (job['company'] ?? '').toLowerCase().contains(q) ||
+              (job['salary'] ?? '').toLowerCase().contains(q) ||
+              (job['location'] ?? '').toLowerCase().contains(q) ||
+              (job['description'] ?? '').toLowerCase().contains(q),
+        )
+        .toList();
   }
 
-  void _updateJobStatus(int index, String newStatus) async {
-    final job = jobs[index];
-    final updatedJob = job.copyWith(status: newStatus);
-    await JobDatabase.instance.updateJob(updatedJob, updatedJob.id!); // cần id
-    setState(() {
-      jobs[index] = updatedJob;
-    });
-  }
-
-  void _editJob(int index) async {
-    final oldJob = jobs[index];
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => RecruiterPostJobScreen(
-          initialJob: oldJob,
-          onJobPosted: (editedJob) async {
-            final newJob = editedJob.copyWith(id: oldJob.id);
-            await JobDatabase.instance.updateJob(newJob, oldJob.id!);
-            setState(() {
-              jobs[index] = newJob;
-            });
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatsDescription(List<Job> currentList) {
-    final listChucDanh = currentList.map((j) => j.title).toSet().toList();
+  Widget _buildStatsDescription(List<Map<String, String>> currentList) {
+    final listChucDanh = currentList.map((j) => j['title']).toSet().toList();
     String chucdanh = listChucDanh.join(', ');
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
       child: Text(
-        "Hiện tại đang có ${currentList.length} vị trí"
-            "${listChucDanh.isNotEmpty ? " (${chucdanh})" : ""}. "
-            "Vị trí sẽ duyệt theo chức danh/vị trí công việc mà bạn đã đăng.",
+        "Hiện tại đang có  ${currentList.length} vị trí"
+        "${listChucDanh.isNotEmpty ? " (${chucdanh})" : ""}. "
+        "Vị trí sẽ duyệt theo chức danh/vị trí công việc mà bạn đã đăng.",
         style: const TextStyle(
           color: Colors.blue,
           fontWeight: FontWeight.w600,
@@ -103,7 +78,10 @@ class _RecruiterManageJobsScreenState extends State<RecruiterManageJobsScreen> {
           prefixIcon: const Icon(Icons.search),
           fillColor: Colors.white,
           filled: true,
-          contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 8,
+            horizontal: 16,
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(18),
             borderSide: const BorderSide(color: Color(0xFFD8D8D8), width: 1),
@@ -116,11 +94,6 @@ class _RecruiterManageJobsScreenState extends State<RecruiterManageJobsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
     return DefaultTabController(
       length: 5,
       child: Scaffold(
@@ -136,8 +109,13 @@ class _RecruiterManageJobsScreenState extends State<RecruiterManageJobsScreen> {
                 labelColor: Colors.blue,
                 unselectedLabelColor: Colors.black,
                 indicatorColor: Colors.blue,
-                labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal),
+                labelStyle: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+                unselectedLabelStyle: const TextStyle(
+                  fontWeight: FontWeight.normal,
+                ),
                 tabs: const [
                   Tab(text: "Tất cả"),
                   Tab(text: "Đang mở"),
@@ -163,12 +141,7 @@ class _RecruiterManageJobsScreenState extends State<RecruiterManageJobsScreen> {
                           itemCount: filterJobs(jobs).length,
                           itemBuilder: (context, index) {
                             final filteredJob = filterJobs(jobs)[index];
-                            final realIndex = jobs.indexOf(filteredJob);
-                            return JobCard(
-                              job: filteredJob,
-                              onEdit: () => _editJob(realIndex),
-                              onChangeStatus: (status) => _updateJobStatus(realIndex, status),
-                            );
+                            return JobCard(job: filteredJob);
                           },
                         ),
                 ),
@@ -181,17 +154,16 @@ class _RecruiterManageJobsScreenState extends State<RecruiterManageJobsScreen> {
                 _buildSearchBar((q) => setState(() => searchQuery = q)),
                 Expanded(
                   child: filterJobs(getJobsByStatus("open")).isEmpty
-                      ? const RecruiterNoDataWidget(text: "Không có vị trí đang mở")
+                      ? const RecruiterNoDataWidget(
+                          text: "Không có vị trí đang mở",
+                        )
                       : ListView.builder(
                           itemCount: filterJobs(getJobsByStatus("open")).length,
                           itemBuilder: (context, idx) {
-                            final filteredJob = filterJobs(getJobsByStatus("open"))[idx];
-                            final realIndex = jobs.indexOf(filteredJob);
-                            return JobCard(
-                              job: filteredJob,
-                              onEdit: () => _editJob(realIndex),
-                              onChangeStatus: (status) => _updateJobStatus(realIndex, status),
-                            );
+                            final filteredJob = filterJobs(
+                              getJobsByStatus("open"),
+                            )[idx];
+                            return JobCard(job: filteredJob);
                           },
                         ),
                 ),
@@ -204,17 +176,18 @@ class _RecruiterManageJobsScreenState extends State<RecruiterManageJobsScreen> {
                 _buildSearchBar((q) => setState(() => searchQuery = q)),
                 Expanded(
                   child: filterJobs(getJobsByStatus("pending")).isEmpty
-                      ? const RecruiterNoDataWidget(text: "Chưa có vị trí chờ duyệt")
+                      ? const RecruiterNoDataWidget(
+                          text: "Chưa có vị trí chờ duyệt",
+                        )
                       : ListView.builder(
-                          itemCount: filterJobs(getJobsByStatus("pending")).length,
+                          itemCount: filterJobs(
+                            getJobsByStatus("pending"),
+                          ).length,
                           itemBuilder: (context, idx) {
-                            final filteredJob = filterJobs(getJobsByStatus("pending"))[idx];
-                            final realIndex = jobs.indexOf(filteredJob);
-                            return JobCard(
-                              job: filteredJob,
-                              onEdit: () => _editJob(realIndex),
-                              onChangeStatus: (status) => _updateJobStatus(realIndex, status),
-                            );
+                            final filteredJob = filterJobs(
+                              getJobsByStatus("pending"),
+                            )[idx];
+                            return JobCard(job: filteredJob);
                           },
                         ),
                 ),
@@ -227,17 +200,18 @@ class _RecruiterManageJobsScreenState extends State<RecruiterManageJobsScreen> {
                 _buildSearchBar((q) => setState(() => searchQuery = q)),
                 Expanded(
                   child: filterJobs(getJobsByStatus("rejected")).isEmpty
-                      ? const RecruiterNoDataWidget(text: "Không có vị trí bị từ chối")
+                      ? const RecruiterNoDataWidget(
+                          text: "Không có vị trí bị từ chối",
+                        )
                       : ListView.builder(
-                          itemCount: filterJobs(getJobsByStatus("rejected")).length,
+                          itemCount: filterJobs(
+                            getJobsByStatus("rejected"),
+                          ).length,
                           itemBuilder: (context, idx) {
-                            final filteredJob = filterJobs(getJobsByStatus("rejected"))[idx];
-                            final realIndex = jobs.indexOf(filteredJob);
-                            return JobCard(
-                              job: filteredJob,
-                              onEdit: () => _editJob(realIndex),
-                              onChangeStatus: (status) => _updateJobStatus(realIndex, status),
-                            );
+                            final filteredJob = filterJobs(
+                              getJobsByStatus("rejected"),
+                            )[idx];
+                            return JobCard(job: filteredJob);
                           },
                         ),
                 ),
@@ -250,17 +224,18 @@ class _RecruiterManageJobsScreenState extends State<RecruiterManageJobsScreen> {
                 _buildSearchBar((q) => setState(() => searchQuery = q)),
                 Expanded(
                   child: filterJobs(getJobsByStatus("closed")).isEmpty
-                      ? const RecruiterNoDataWidget(text: "Không có vị trí đã đóng")
+                      ? const RecruiterNoDataWidget(
+                          text: "Không có vị trí đã đóng",
+                        )
                       : ListView.builder(
-                          itemCount: filterJobs(getJobsByStatus("closed")).length,
+                          itemCount: filterJobs(
+                            getJobsByStatus("closed"),
+                          ).length,
                           itemBuilder: (context, idx) {
-                            final filteredJob = filterJobs(getJobsByStatus("closed"))[idx];
-                            final realIndex = jobs.indexOf(filteredJob);
-                            return JobCard(
-                              job: filteredJob,
-                              onEdit: () => _editJob(realIndex),
-                              onChangeStatus: (status) => _updateJobStatus(realIndex, status),
-                            );
+                            final filteredJob = filterJobs(
+                              getJobsByStatus("closed"),
+                            )[idx];
+                            return JobCard(job: filteredJob);
                           },
                         ),
                 ),
@@ -274,19 +249,11 @@ class _RecruiterManageJobsScreenState extends State<RecruiterManageJobsScreen> {
             width: double.infinity,
             height: 50,
             child: ElevatedButton(
-              onPressed: () async {
-                await Navigator.push(
+              onPressed: () {
+                Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => RecruiterPostJobScreen(
-                      onJobPosted: (job) async {
-                        int id = await JobDatabase.instance.createJob(job);
-                        Job jobWithId = job.copyWith(id: id);
-                        setState(() {
-                          jobs.add(jobWithId);
-                        });
-                      },
-                    ),
+                    builder: (context) => RecruiterPostJobScreen(),
                   ),
                 );
               },

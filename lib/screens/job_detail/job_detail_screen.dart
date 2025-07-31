@@ -1,6 +1,5 @@
 // lib/screens/job_detail/job_detail_screen.dart
 import 'package:flutter/material.dart';
-import 'package:job_finder_app/models/job_model.dart';
 import 'package:job_finder_app/widgets/job_detail/bullet_list_item.dart';
 import 'package:job_finder_app/widgets/job_detail/company_info_card.dart';
 import 'package:job_finder_app/widgets/job_detail/info_chip.dart';
@@ -8,7 +7,7 @@ import 'package:job_finder_app/widgets/job_detail/section_header.dart';
 import '../../widgets/job_detail/map_widget.dart';
 
 class JobDetailScreen extends StatefulWidget {
-  final Job job; // Nhận dữ liệu công việc từ màn hình trước
+  final Map<String, String> job; // Nhận dữ liệu công việc từ màn hình trước
 
   const JobDetailScreen({super.key, required this.job});
 
@@ -31,7 +30,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
         elevation: 0.5,
         leading: const BackButton(color: Colors.black),
         title: Text(
-          'Back-End Developer', // Tiêu đề AppBar
+          widget.job['title'] ?? 'Back-End Developer', // Tiêu đề AppBar
           style: textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.bold,
             fontSize: 18,
@@ -75,12 +74,12 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            widget.job.title,
+            widget.job['title'] ?? '',
             style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
-            widget.job.salary,
+            widget.job['salary'] ?? '',
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -94,15 +93,24 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             children: [
               InfoChip(
                 icon: Icons.location_on_outlined,
-                text: widget.job.location,
+                text: widget.job['location'] ?? '',
               ),
-              InfoChip(icon: Icons.work_outline, text: widget.job.experience),
+              InfoChip(
+                icon: Icons.work_outline,
+                text: widget.job['experience'] ?? '',
+              ),
               InfoChip(
                 icon: Icons.school_outlined,
-                text: widget.job.educationLevel,
+                text: widget.job['educationLevel'] ?? '',
               ),
-              InfoChip(icon: Icons.schedule_outlined, text: widget.job.jobType),
-              InfoChip(icon: Icons.today_outlined, text: widget.job.postedDate),
+              InfoChip(
+                icon: Icons.schedule_outlined,
+                text: widget.job['jobType'] ?? '',
+              ),
+              InfoChip(
+                icon: Icons.today_outlined,
+                text: widget.job['postedDate'] ?? '',
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -141,7 +149,8 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           const SizedBox(height: 8),
-          ...widget.job.description
+          ...(widget.job['description'] ?? '')
+              .split('\n')
               .map((item) => BulletListItem(text: item))
               .toList(),
           const SizedBox(height: 16),
@@ -150,13 +159,14 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           const SizedBox(height: 8),
-          ...widget.job.requirements
+          ...(widget.job['requirements'] ?? '')
+              .split('\n')
               .map((item) => BulletListItem(text: item))
               .toList(),
           const Divider(height: 32),
 
           const SectionHeader(title: 'Lợi ích công việc'),
-          ...widget.job.benefits.map((item) {
+          ...(widget.job['benefits'] ?? '').split('\n').map((item) {
             final parts = item.split(':');
             return Padding(
               padding: const EdgeInsets.only(bottom: 8.0),
@@ -180,7 +190,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
 
           const SectionHeader(title: 'Địa chỉ làm việc'),
           Text(
-            widget.job.workAddress,
+            widget.job['workAddress'] ?? '',
             style: Theme.of(
               context,
             ).textTheme.bodyMedium?.copyWith(fontSize: 15, height: 1.5),
@@ -189,7 +199,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           // Giải thích chi tiết về widget.job.workAddress:
           //
           // 1. `widget` là một thuộc tính đặc biệt trong State class (_JobDetailScreenState) của StatefulWidget (JobDetailScreen).
-          //    Khi bạn tạo một StatefulWidget, bạn sẽ có 2 class: 
+          //    Khi bạn tạo một StatefulWidget, bạn sẽ có 2 class:
           //    - class JobDetailScreen extends StatefulWidget
           //    - class _JobDetailScreenState extends State<JobDetailScreen>
           //    Trong class State, bạn có thể truy cập các thuộc tính của widget cha thông qua biến `widget`.
@@ -199,14 +209,14 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           //
           // 3. `workAddress` là một thuộc tính của đối tượng job, lưu trữ địa chỉ làm việc của công việc đó.
           //
-          // => Vì vậy, `widget.job.workAddress` sẽ lấy ra địa chỉ làm việc của công việc hiện tại, 
+          // => Vì vậy, `widget.job.workAddress` sẽ lấy ra địa chỉ làm việc của công việc hiện tại,
           //    được truyền từ màn hình trước vào JobDetailScreen.
           //
-          // Ví dụ: Khi bạn mở chi tiết một công việc, màn hình này sẽ nhận một đối tượng Job (job) 
+          // Ví dụ: Khi bạn mở chi tiết một công việc, màn hình này sẽ nhận một đối tượng Job (job)
           // và bạn có thể truy cập các thông tin của công việc đó qua widget.job.
           MapWidget(
-            address: widget.job.workAddress,
-            companyName: widget.job.companyName,
+            address: widget.job['workAddress'] ?? '',
+            companyName: widget.job['companyName'] ?? '',
           ),
           const SizedBox(height: 24),
 

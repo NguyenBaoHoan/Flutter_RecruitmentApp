@@ -1,17 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../models/job_model.dart';
 import 'package:intl/intl.dart';
 
-
 class RecruiterPostJobScreen extends StatefulWidget {
-  final void Function(Job newJob) onJobPosted;
-  final Job? initialJob;
+  final void Function(Map<String, String> newJob)? onJobPosted;
+  final Map<String, String>? initialJob;
 
-  const RecruiterPostJobScreen({
-    super.key,
-    required this.onJobPosted,
-    this.initialJob,
-  });
+  const RecruiterPostJobScreen({super.key, this.onJobPosted, this.initialJob});
 
   @override
   State<RecruiterPostJobScreen> createState() => _RecruiterPostJobScreenState();
@@ -29,22 +23,19 @@ class _RecruiterPostJobScreenState extends State<RecruiterPostJobScreen> {
   String _status = 'pending';
 
   final DateFormat _dateFormatDisplay = DateFormat('dd/MM/yyyy');
-  final DateFormat _dateFormatSave = DateFormat('yyyy-MM-dd');
 
   @override
   void initState() {
     super.initState();
     if (widget.initialJob != null) {
       final job = widget.initialJob!;
-      _title = job.title;
-      _company = job.company;
-      _salary = job.salary;
-      _location = job.location;
-      _descriptionController.text = job.description;
-      _dateController.text = _dateFormatDisplay.format(
-        DateTime.tryParse(job.postDate) ?? DateTime.now(),
-      );
-      _status = job.status;
+      _title = job['title'] ?? '';
+      _company = job['company'] ?? '';
+      _salary = job['salary'] ?? '';
+      _location = job['location'] ?? '';
+      _descriptionController.text = job['description'] ?? '';
+      _dateController.text = job['postDate'] ?? '';
+      _status = job['status'] ?? 'pending';
     }
   }
 
@@ -59,7 +50,7 @@ class _RecruiterPostJobScreenState extends State<RecruiterPostJobScreen> {
     DateTime now = DateTime.now();
     DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.tryParse(widget.initialJob?.postDate ?? '') ?? now,
+      initialDate: now,
       firstDate: now,
       lastDate: now.add(const Duration(days: 730)),
       helpText: 'Chọn hạn nộp hồ sơ',
@@ -85,14 +76,19 @@ class _RecruiterPostJobScreenState extends State<RecruiterPostJobScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F7),
       appBar: AppBar(
-        title: Text(widget.initialJob == null
-            ? "Đăng một công việc mới"
-            : "Chỉnh sửa thông tin công việc"),
+        title: Text(
+          widget.initialJob == null
+              ? "Đăng một công việc mới"
+              : "Chỉnh sửa thông tin công việc",
+        ),
         backgroundColor: Colors.white,
         elevation: 1,
         iconTheme: const IconThemeData(color: Colors.black),
         titleTextStyle: const TextStyle(
-            color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20),
+          color: Colors.black,
+          fontWeight: FontWeight.bold,
+          fontSize: 20,
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -115,27 +111,24 @@ class _RecruiterPostJobScreenState extends State<RecruiterPostJobScreen> {
                 label: "Tên công ty",
                 initialValue: _company,
                 onSaved: (v) => _company = v ?? '',
-                validator: (v) => v == null || v.trim().isEmpty
-                    ? "Nhập tên công ty"
-                    : null,
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? "Nhập tên công ty" : null,
               ),
               const SizedBox(height: 18),
               _buildTextField(
                 label: "Mức lương",
                 initialValue: _salary,
                 onSaved: (v) => _salary = v ?? '',
-                validator: (v) => v == null || v.trim().isEmpty
-                    ? "Nhập mức lương"
-                    : null,
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? "Nhập mức lương" : null,
               ),
               const SizedBox(height: 18),
               _buildTextField(
                 label: "Địa điểm làm việc",
                 initialValue: _location,
                 onSaved: (v) => _location = v ?? '',
-                validator: (v) => v == null || v.trim().isEmpty
-                    ? "Nhập địa điểm"
-                    : null,
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? "Nhập địa điểm" : null,
               ),
               const SizedBox(height: 18),
               _buildDescriptionField(),
@@ -152,10 +145,11 @@ class _RecruiterPostJobScreenState extends State<RecruiterPostJobScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     textStyle: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.2),
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.2,
+                    ),
                     elevation: 1,
                   ),
                   onPressed: () {
@@ -163,28 +157,32 @@ class _RecruiterPostJobScreenState extends State<RecruiterPostJobScreen> {
                       if (!_validateDate(_dateController.text)) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                              content: Text("Nhập hạn nộp hồ sơ đúng định dạng dd/MM/yyyy")),
+                            content: Text(
+                              "Nhập hạn nộp hồ sơ đúng định dạng dd/MM/yyyy",
+                            ),
+                          ),
                         );
                         return;
                       }
                       _formKey.currentState?.save();
-                      final parsedDate =
-                      _dateFormatDisplay.parseStrict(_dateController.text);
-                      final job = Job(
-                        iconUrl: "",
-                        title: _title,
-                        company: _company,
-                        salary: _salary,
-                        location: _location,
-                        postDate: _dateFormatSave.format(parsedDate),
-                        status: _status,
-                        description: _descriptionController.text,
-                      );
-                      widget.onJobPosted(job);
+                      final job = {
+                        'title': _title,
+                        'company': _company,
+                        'salary': _salary,
+                        'location': _location,
+                        'postDate': _dateController.text,
+                        'status': _status,
+                        'description': _descriptionController.text,
+                      };
+                      if (widget.onJobPosted != null) {
+                        widget.onJobPosted!(job);
+                      }
                       Navigator.pop(context);
                     }
                   },
-                  child: Text(widget.initialJob == null ? "Đăng tin" : "Lưu chỉnh sửa"),
+                  child: Text(
+                    widget.initialJob == null ? "Đăng tin" : "Lưu chỉnh sửa",
+                  ),
                 ),
               ),
             ],
@@ -203,7 +201,10 @@ class _RecruiterPostJobScreenState extends State<RecruiterPostJobScreen> {
         const Text(
           "Điền thông tin tuyển dụng thật chi tiết nhé!",
           style: TextStyle(
-              fontSize: 16, fontWeight: FontWeight.w500, color: Colors.black87),
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
           textAlign: TextAlign.center,
         ),
       ],
@@ -222,8 +223,10 @@ class _RecruiterPostJobScreenState extends State<RecruiterPostJobScreen> {
         labelText: label,
         filled: true,
         fillColor: Colors.white,
-        contentPadding:
-        const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 16,
+          horizontal: 16,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: Color(0xFFD8D8D8), width: 1),
@@ -252,8 +255,10 @@ class _RecruiterPostJobScreenState extends State<RecruiterPostJobScreen> {
         labelText: "Mô tả công việc",
         filled: true,
         fillColor: Colors.white,
-        contentPadding:
-        const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 16,
+          horizontal: 16,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: Color(0xFFD8D8D8), width: 1),
@@ -268,9 +273,8 @@ class _RecruiterPostJobScreenState extends State<RecruiterPostJobScreen> {
         ),
       ),
       style: const TextStyle(fontSize: 15),
-      validator: (value) => value == null || value.trim().isEmpty
-          ? "Nhập mô tả công việc"
-          : null,
+      validator: (value) =>
+          value == null || value.trim().isEmpty ? "Nhập mô tả công việc" : null,
     );
   }
 
@@ -286,8 +290,10 @@ class _RecruiterPostJobScreenState extends State<RecruiterPostJobScreen> {
           icon: const Icon(Icons.calendar_today, color: Color(0xFF1976D2)),
           onPressed: () => _showDatePicker(context),
         ),
-        contentPadding:
-        const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 16,
+          horizontal: 16,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: Color(0xFFD8D8D8), width: 1),
