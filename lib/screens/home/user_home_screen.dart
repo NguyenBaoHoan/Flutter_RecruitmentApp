@@ -7,6 +7,7 @@ import '../../../models/job_model.dart';
 import '../../widgets/job_detail/job_card.dart';
 import '../choose_area/choose_area_screen.dart';
 import '../../screens/job_detail/job_detail_screen.dart';
+import '../../screens/search/search_screen.dart';
 
 class UserHomeScreen extends StatefulWidget {
   const UserHomeScreen({Key? key}) : super(key: key);
@@ -19,7 +20,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   // Dữ liệu mẫu
   final List<Job> jobs = [
     Job(
-      title: 'Nhân Viên Lễ Tân Kiêm Sale',
+      name: 'Nhân Viên Lễ Tân Kiêm Sale',
       companyName: 'CÔNG TY CỔ PHẦN ĐẦU TƯ XÂY DỰNG BẤT ĐỘNG SẢN HOÀNG TRIỀU',
       salary: '10-12 Triệu',
       location: 'Bình Thạnh - Hồ Chí Minh',
@@ -37,7 +38,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       companyIndustry: 'Bất động sản',
     ),
     Job(
-      title: 'Chuyên Viên Kế Toán Tổng Hợp',
+      name: 'Chuyên Viên Kế Toán Tổng Hợp',
       companyName: 'CÔNG TY CỔ PHẦN CÔNG NGHỆ VÀ DỊCH VỤ DỮ LIỆU SỐ TDS',
       salary: '18-20 Triệu',
       location: 'Cầu Giấy - Hà Nội',
@@ -55,7 +56,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       companyIndustry: 'Công nghệ',
     ),
     Job(
-      title: 'Nhân Viên Kinh Doanh Thuốc Thủy Sản',
+      name: 'Nhân Viên Kinh Doanh Thuốc Thủy Sản',
       companyName: 'CÔNG TY TNHH HÓA CHẤT THỊNH THỊNH',
       salary: 'Thỏa thuận',
       location: 'Thủ Đức - Hồ Chí Minh',
@@ -73,7 +74,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       companyIndustry: 'Hóa chất',
     ),
     Job(
-      title: 'Nhân Viên Kinh Doanh',
+      name: 'Nhân Viên Kinh Doanh',
       companyName: 'CÔNG TY TNHH FLUMA TECH',
       salary: 'Thỏa thuận',
       location: 'Quận 7 - Hồ Chí Minh',
@@ -175,7 +176,15 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       ),
       child: IconButton(
         icon: Icon(icon, color: Colors.black54),
-        onPressed: () {},
+        onPressed: () {
+          if (icon == Icons.search) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) =>  SearchScreen()),
+            );
+          }
+          // Xử lý các icon khác nếu cần
+        },
       ),
     );
   }
