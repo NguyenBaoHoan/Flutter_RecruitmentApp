@@ -308,7 +308,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 print('Navigate to Privacy Policy');
                               },
                           ),
-                          const TextSpan(text: ' của goodboss.'),
+                          const TextSpan(text: ' của Job Hunter.'),
                         ],
                       ),
                     ),

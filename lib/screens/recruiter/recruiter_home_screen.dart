@@ -23,7 +23,11 @@ class _RecruiterHomeScreenState extends State<RecruiterHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // <<< THÊM MỚI >>> Lấy theme hiện tại để sử dụng
+    final theme = Theme.of(context);
+
     return Scaffold(
+      // <<< SỬA ĐỔI >>> AppBar sẽ tự động đổi màu theo theme
       appBar: AppBar(
         title: const Text("Quản lý vị trí"),
         centerTitle: true,
@@ -32,14 +36,16 @@ class _RecruiterHomeScreenState extends State<RecruiterHomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: 32),
-          const Center(
-            child: Icon(Icons.business_center, size: 100, color: Colors.blueAccent),
+          Center(
+            // <<< SỬA ĐỔI >>> Icon sẽ lấy màu chính từ theme
+            child: Icon(Icons.business_center, size: 100, color: theme.colorScheme.primary),
           ),
           const SizedBox(height: 16),
           const Center(
             child: Text(
               "Chưa có dữ liệu",
-              style: TextStyle(fontSize: 18, color: Colors.grey),
+              // <<< SỬA ĐỔI >>> Text sẽ tự động đổi màu
+              style: TextStyle(fontSize: 18),
             ),
           ),
           const Spacer(),
@@ -52,8 +58,10 @@ class _RecruiterHomeScreenState extends State<RecruiterHomeScreen> {
                 onPressed: () {
                   Navigator.pushNamed(context, '/manage-jobs');
                 },
+                // <<< SỬA ĐỔI >>> Nút sẽ tự động lấy màu từ theme
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
+                  backgroundColor: theme.colorScheme.primary,
+                  foregroundColor: theme.colorScheme.onPrimary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),

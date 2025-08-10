@@ -52,16 +52,20 @@ class _RecruiterManageJobsScreenState extends State<RecruiterManageJobsScreen> {
   }
 
   Widget _buildStatsDescription(List<Map<String, String>> currentList) {
+    // <<< THÊM MỚI >>> Lấy theme để sử dụng
+    final theme = Theme.of(context);
     final listChucDanh = currentList.map((j) => j['title']).toSet().toList();
     String chucdanh = listChucDanh.join(', ');
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
       child: Text(
-        "Hiện tại đang có  ${currentList.length} vị trí"
+        "Hiện tại đang có ${currentList.length} vị trí"
         "${listChucDanh.isNotEmpty ? " (${chucdanh})" : ""}. "
         "Vị trí sẽ duyệt theo chức danh/vị trí công việc mà bạn đã đăng.",
-        style: const TextStyle(
-          color: Colors.blue,
+        // <<< SỬA ĐỔI >>> Dùng màu chính của theme
+        style: TextStyle(
+          color: theme.colorScheme.primary,
           fontWeight: FontWeight.w600,
           fontSize: 15,
         ),
@@ -70,13 +74,17 @@ class _RecruiterManageJobsScreenState extends State<RecruiterManageJobsScreen> {
   }
 
   Widget _buildSearchBar(void Function(String) onChanged) {
+    // <<< THÊM MỚI >>> Lấy theme để sử dụng
+    final theme = Theme.of(context);
+    
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
       child: TextField(
         decoration: InputDecoration(
           hintText: 'Tìm kiếm theo tên, chức danh, lương, mô tả...',
           prefixIcon: const Icon(Icons.search),
-          fillColor: Colors.white,
+          // <<< SỬA ĐỔI >>> Dùng màu card từ theme
+          fillColor: theme.cardColor,
           filled: true,
           contentPadding: const EdgeInsets.symmetric(
             vertical: 8,
@@ -84,7 +92,12 @@ class _RecruiterManageJobsScreenState extends State<RecruiterManageJobsScreen> {
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(18),
-            borderSide: const BorderSide(color: Color(0xFFD8D8D8), width: 1),
+            // <<< SỬA ĐỔI >>> Dùng màu viền từ theme
+            borderSide: BorderSide(color: theme.dividerColor, width: 1),
+          ),
+          enabledBorder: OutlineInputBorder( // <<< THÊM MỚI >>> Thêm enabledBorder để đồng bộ
+            borderRadius: BorderRadius.circular(18),
+            borderSide: BorderSide(color: theme.dividerColor, width: 1),
           ),
         ),
         onChanged: onChanged,
@@ -92,8 +105,11 @@ class _RecruiterManageJobsScreenState extends State<RecruiterManageJobsScreen> {
     );
   }
 
-  @override
+    @override
   Widget build(BuildContext context) {
+    // <<< THÊM MỚI >>> Lấy theme để sử dụng
+    final theme = Theme.of(context);
+
     return DefaultTabController(
       length: 5,
       child: Scaffold(
@@ -106,9 +122,10 @@ class _RecruiterManageJobsScreenState extends State<RecruiterManageJobsScreen> {
               alignment: Alignment.centerLeft,
               child: TabBar(
                 isScrollable: true,
-                labelColor: Colors.blue,
-                unselectedLabelColor: Colors.black,
-                indicatorColor: Colors.blue,
+                // <<< SỬA ĐỔI >>> TabBar sẽ tự động đổi màu theo theme
+                labelColor: theme.colorScheme.primary,
+                unselectedLabelColor: theme.textTheme.bodyLarge?.color?.withOpacity(0.7),
+                indicatorColor: theme.colorScheme.primary,
                 labelStyle: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -150,19 +167,15 @@ class _RecruiterManageJobsScreenState extends State<RecruiterManageJobsScreen> {
             // TAB ĐANG MỞ
             Column(
               children: [
-                _buildStatsDescription(filterJobs(getJobsByStatus("open"))),
+                _buildStatsDescription(filterJobs(jobs)),
                 _buildSearchBar((q) => setState(() => searchQuery = q)),
                 Expanded(
-                  child: filterJobs(getJobsByStatus("open")).isEmpty
-                      ? const RecruiterNoDataWidget(
-                          text: "Không có vị trí đang mở",
-                        )
+                  child: filterJobs(jobs).isEmpty
+                      ? const RecruiterNoDataWidget(text: "Chưa có vị trí nào!")
                       : ListView.builder(
-                          itemCount: filterJobs(getJobsByStatus("open")).length,
-                          itemBuilder: (context, idx) {
-                            final filteredJob = filterJobs(
-                              getJobsByStatus("open"),
-                            )[idx];
+                          itemCount: filterJobs(jobs).length,
+                          itemBuilder: (context, index) {
+                            final filteredJob = filterJobs(jobs)[index];
                             return JobCard(job: filteredJob);
                           },
                         ),
@@ -257,8 +270,10 @@ class _RecruiterManageJobsScreenState extends State<RecruiterManageJobsScreen> {
                   ),
                 );
               },
+              // <<< SỬA ĐỔI >>> Nút sẽ tự động lấy màu từ theme
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
+                backgroundColor: theme.colorScheme.primary,
+                foregroundColor: theme.colorScheme.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),

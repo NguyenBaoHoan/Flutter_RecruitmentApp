@@ -7,17 +7,20 @@ class SettingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // <<< THÊM MỚI >>> Lấy theme hiện tại để sử dụng
+    final theme = Theme.of(context);
+
     return Scaffold(
+      // <<< SỬA ĐỔI >>> AppBar sẽ tự động đổi màu theo theme
       appBar: AppBar(
-        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Trung tâm cài đặt',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -41,12 +44,13 @@ class SettingScreen extends StatelessWidget {
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                // xử lý đăng xuất
                 onPressed: () async {
                   await _logout(context);
                 },
+                // <<< SỬA ĐỔI >>> Dùng màu sắc từ theme cho nút đăng xuất
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
+                  backgroundColor: theme.colorScheme.errorContainer, // Nền cho hành động nguy hiểm
+                  foregroundColor: theme.colorScheme.onErrorContainer, // Chữ cho hành động nguy hiểm
                   elevation: 0,
                   side: const BorderSide(color: Colors.transparent),
                   shape: RoundedRectangleBorder(
@@ -56,14 +60,14 @@ class SettingScreen extends StatelessWidget {
                 ),
                 child: const Text(
                   'Đăng xuất',
-                  style: TextStyle(color: Colors.red, fontSize: 16),
+                  style: TextStyle(fontSize: 16),
                 ),
               ),
             ),
           ),
         ],
       ),
-      backgroundColor: Colors.white,
+      // <<< SỬA ĐỔI >>> Xóa màu nền cố định, Scaffold sẽ tự lấy màu từ theme
     );
   }
 
@@ -72,10 +76,10 @@ class SettingScreen extends StatelessWidget {
       children: [
         ListTile(
           title: Text(title, style: const TextStyle(fontSize: 16)),
+          // <<< SỬA ĐỔI >>> Icon sẽ tự động đổi màu
           trailing: const Icon(
             Icons.arrow_forward_ios,
             size: 16,
-            color: Colors.black38,
           ),
           onTap: () {
             // TODO: Xử lý chuyển trang tương ứng
@@ -97,9 +101,10 @@ class SettingScreen extends StatelessWidget {
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: const [
-              Text('Người tìm việc', style: TextStyle(color: Colors.black54)),
+              // <<< SỬA ĐỔI >>> Text và Icon sẽ tự động đổi màu
+              Text('Người tìm việc'),
               SizedBox(width: 4),
-              Icon(Icons.arrow_forward_ios, size: 16, color: Colors.black38),
+              Icon(Icons.arrow_forward_ios, size: 16),
             ],
           ),
           onTap: () {
@@ -112,7 +117,8 @@ class SettingScreen extends StatelessWidget {
   }
 
   Future<void> _logout(BuildContext context) async {
-    // Hiển thị dialog xác nhận
+    final theme = Theme.of(context); // <<< THÊM MỚI >>> Lấy theme cho Dialog
+
     final shouldLogout = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
@@ -126,15 +132,17 @@ class SettingScreen extends StatelessWidget {
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text(
+              child: Text(
                 'Đăng xuất',
-                style: TextStyle(color: Colors.red),
+                // <<< SỬA ĐỔI >>> Dùng màu error từ theme
+                style: TextStyle(color: theme.colorScheme.error),
               ),
             ),
           ],
         );
       },
     );
+
 
     if (shouldLogout == true) {
       // Xóa dữ liệu đăng nhập từ SharedPreferences

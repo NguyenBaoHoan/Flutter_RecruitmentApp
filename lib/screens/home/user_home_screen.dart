@@ -55,8 +55,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // <<< SỬA ĐỔI >>> Xóa màu nền cố định, Scaffold sẽ tự lấy màu từ theme
     return Scaffold(
-      backgroundColor: Colors.grey[100],
       body: SafeArea(
         child: Column(
           children: [
@@ -67,13 +67,14 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
               child: _loading
                   ? const Center(child: CircularProgressIndicator())
                   : _error != null
-                  ? Center(child: Text('Lỗi: $_error'))
-                  : ListView.builder(
-                      itemCount: jobs.length,
-                      itemBuilder: (context, index) {
-                        return JobCard(job: jobs[index].toMap());
-                      },
-                    ),
+                      ? Center(child: Text('Lỗi: $_error'))
+                      : ListView.builder(
+                          itemCount: jobs.length,
+                          itemBuilder: (context, index) {
+                            // Giả sử JobCard đã được tối ưu hóa
+                            return JobCard(job: jobs[index].toMap());
+                          },
+                        ),
             ),
           ],
         ),
@@ -86,29 +87,33 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   }
 
   Widget _buildTopBar() {
+    // <<< THÊM MỚI >>> Lấy theme để sử dụng
+    final theme = Theme.of(context);
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.grey[300]!),
-            ),
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ChooseAreaScreen(),
-                  ),
-                );
-              },
-              child: Row(
-                children: const [
-                  Icon(Icons.location_on_outlined, color: Colors.black54),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ChooseAreaScreen(),
+                ),
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                // <<< SỬA ĐỔI >>> Dùng màu từ theme
+                color: theme.cardColor,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: theme.dividerColor),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.location_on_outlined), // Icon sẽ tự đổi màu
                   SizedBox(width: 8),
                   Text('Khu vực'),
                 ],
@@ -125,15 +130,18 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   }
 
   Widget _buildIconButton(IconData icon) {
+    final theme = Theme.of(context);
+
     return Container(
       margin: const EdgeInsets.only(left: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        // <<< SỬA ĐỔI >>> Dùng màu từ theme
+        color: theme.cardColor,
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: IconButton(
-        icon: Icon(icon, color: Colors.black54),
+        icon: Icon(icon), // Icon sẽ tự đổi màu
         onPressed: () {
           if (icon == Icons.search) {
             Navigator.push(
@@ -148,11 +156,16 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   }
 
   Widget _buildResumeAlert() {
+    // <<< THÊM MỚI >>> Lấy theme để sử dụng
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey[800],
+        // <<< SỬA ĐỔI >>> Dùng màu phù hợp cho cả 2 chế độ
+        color: isDarkMode ? Colors.grey[800] : Colors.black87,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -161,10 +174,11 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           const SizedBox(width: 12),
           Expanded(
             child: RichText(
-              text: const TextSpan(
-                style: TextStyle(color: Colors.white, fontSize: 13),
+              text: TextSpan(
+                // <<< SỬA ĐỔI >>> Đảm bảo style chữ phù hợp
+                style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white),
                 children: [
-                  TextSpan(
+                  const TextSpan(
                     text:
                         'Sơ yếu lý lịch đã được ẩn. Mở nó ra có thể cải thiện hiệu quả tìm kiếm việc làm. ',
                   ),
@@ -173,6 +187,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       decoration: TextDecoration.underline,
+                      color: theme.colorScheme.secondary, // Dùng màu nhấn từ theme
                     ),
                   ),
                 ],
@@ -185,6 +200,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   }
 
   Widget _buildFilterChips() {
+    final theme = Theme.of(context);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Row(
@@ -192,9 +209,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           ActionChip(
             label: const Text('Việc làm hấp dẫn'),
             onPressed: () {},
-            backgroundColor: Colors.blue.withOpacity(0.1),
-            labelStyle: const TextStyle(
-              color: Colors.blue,
+            // <<< SỬA ĐỔI >>> Dùng màu từ theme
+            backgroundColor: theme.colorScheme.primaryContainer,
+            labelStyle: TextStyle(
+              color: theme.colorScheme.onPrimaryContainer,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -202,8 +220,9 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           ActionChip(
             label: const Text('Fullstack Developer'),
             onPressed: () {},
-            backgroundColor: Colors.grey[200],
-            labelStyle: TextStyle(color: Colors.grey[800]),
+            // <<< SỬA ĐỔI >>> Dùng màu từ theme
+            backgroundColor: theme.colorScheme.secondaryContainer,
+            labelStyle: TextStyle(color: theme.colorScheme.onSecondaryContainer),
           ),
         ],
       ),

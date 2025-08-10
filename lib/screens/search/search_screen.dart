@@ -80,10 +80,9 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // <<< SỬA ĐỔI >>> AppBar sẽ tự động đổi màu theo theme
       appBar: AppBar(
         title: const Text('Tìm kiếm việc làm'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
         elevation: 0,
       ),
       body: Column(
@@ -98,13 +97,17 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _buildSearchBar() {
+    // <<< THÊM MỚI >>> Lấy theme hiện tại
+    final theme = Theme.of(context);
+
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        // <<< SỬA ĐỔI >>> Dùng màu từ theme
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: TextField(
         controller: _searchController,
@@ -139,12 +142,10 @@ class _SearchScreenState extends State<SearchScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.history, size: 64, color: Colors.grey),
+            // <<< SỬA ĐỔI >>> Icon và Text sẽ tự động đổi màu
+            Icon(Icons.history, size: 64),
             SizedBox(height: 16),
-            Text(
-              'Chưa có lịch sử tìm kiếm',
-              style: TextStyle(color: Colors.grey),
-            ),
+            Text('Chưa có lịch sử tìm kiếm'),
           ],
         ),
       );
@@ -206,12 +207,10 @@ class _SearchScreenState extends State<SearchScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.search_off, size: 64, color: Colors.grey),
+            // <<< SỬA ĐỔI >>> Icon và Text sẽ tự động đổi màu
+            Icon(Icons.search_off, size: 64),
             SizedBox(height: 16),
-            Text(
-              'Không tìm thấy kết quả',
-              style: TextStyle(color: Colors.grey),
-            ),
+            Text('Không tìm thấy kết quả'),
           ],
         ),
       );
@@ -221,6 +220,7 @@ class _SearchScreenState extends State<SearchScreen> {
       itemCount: _searchResults.length,
       itemBuilder: (context, index) {
         final job = _searchResults[index];
+        // Giả sử JobCard đã được tối ưu hóa hoặc không dùng màu cố định
         return JobCard(job: job.toMap());
       },
     );

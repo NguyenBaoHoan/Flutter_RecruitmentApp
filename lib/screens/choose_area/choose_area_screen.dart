@@ -122,10 +122,11 @@ class _ChooseAreaScreenState extends State<ChooseAreaScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        // <<< SỬA ĐỔI >>> AppBar sẽ tự động đổi màu
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios),
           onPressed: () {
-            Navigator.pop(context); // Quay lại màn hình trước
+            Navigator.pop(context);
           },
         ),
         title: const Text('Hãy chọn khu vực'),
@@ -159,7 +160,9 @@ class _ChooseAreaScreenState extends State<ChooseAreaScreen> {
 
   // Widget cho mục "Toàn quốc"
   Widget _buildNationWideChip() {
+    final theme = Theme.of(context); // <<< THÊM MỚI >>>
     bool isSelected = _selectedProvinces.contains('Toàn quốc');
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -167,10 +170,10 @@ class _ChooseAreaScreenState extends State<ChooseAreaScreen> {
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Text(
             'Toàn quốc',
-            style: TextStyle(
+            // <<< SỬA ĐỔI >>> Xóa màu cố định
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Colors.grey[600],
             ),
           ),
         ),
@@ -179,22 +182,21 @@ class _ChooseAreaScreenState extends State<ChooseAreaScreen> {
           runSpacing: 8.0,
           children: [
             ChoiceChip(
-              label: Text(
-                'Toàn quốc',
-                style: TextStyle(
-                  color: isSelected ? Colors.blue : Colors.black87,
-                ),
-              ),
+              label: const Text('Toàn quốc'),
               selected: isSelected,
               onSelected: (selected) {
                 _toggleSelection('Toàn quốc');
               },
-              backgroundColor: Colors.grey[200],
-              selectedColor: Colors.blue.withOpacity(0.1),
+              // <<< SỬA ĐỔI >>> ChoiceChip sẽ tự động đổi màu theo theme
+              backgroundColor: theme.colorScheme.surfaceVariant,
+              selectedColor: theme.colorScheme.primaryContainer,
+              labelStyle: TextStyle(
+                color: isSelected ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.onSurfaceVariant,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20.0),
                 side: BorderSide(
-                  color: isSelected ? Colors.blue : Colors.transparent,
+                  color: isSelected ? theme.colorScheme.primary : Colors.transparent,
                   width: 1,
                 ),
               ),
@@ -212,6 +214,8 @@ class _ChooseAreaScreenState extends State<ChooseAreaScreen> {
 
   // Widget cho mỗi nhóm chữ cái
   Widget _buildGroup(String letter, List<String> provinces) {
+    final theme = Theme.of(context); // <<< THÊM MỚI >>>
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -219,35 +223,34 @@ class _ChooseAreaScreenState extends State<ChooseAreaScreen> {
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Text(
             letter,
-            style: TextStyle(
+            // <<< SỬA ĐỔI >>> Xóa màu cố định
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Colors.grey[600],
             ),
           ),
         ),
         Wrap(
-          spacing: 8.0, // Khoảng cách ngang giữa các chip
-          runSpacing: 8.0, // Khoảng cách dọc giữa các hàng chip
+          spacing: 8.0,
+          runSpacing: 8.0,
           children: provinces.map((province) {
             final isSelected = _selectedProvinces.contains(province);
             return ChoiceChip(
-              label: Text(
-                province,
-                style: TextStyle(
-                  color: isSelected ? Colors.blue : Colors.black87,
-                ),
-              ),
+              label: Text(province),
               selected: isSelected,
               onSelected: (selected) {
                 _toggleSelection(province);
               },
-              backgroundColor: Colors.grey[200],
-              selectedColor: Colors.blue.withOpacity(0.1),
+              // <<< SỬA ĐỔI >>> ChoiceChip sẽ tự động đổi màu theo theme
+              backgroundColor: theme.colorScheme.surfaceVariant,
+              selectedColor: theme.colorScheme.primaryContainer,
+              labelStyle: TextStyle(
+                color: isSelected ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.onSurfaceVariant,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20.0),
                 side: BorderSide(
-                  color: isSelected ? Colors.blue : Colors.transparent,
+                  color: isSelected ? theme.colorScheme.primary : Colors.transparent,
                   width: 1,
                 ),
               ),
@@ -265,25 +268,22 @@ class _ChooseAreaScreenState extends State<ChooseAreaScreen> {
 
   // Widget cho nút "Lưu"
   Widget _buildSaveButton() {
+    final theme = Theme.of(context); // <<< THÊM MỚI >>>
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(
-        16,
-        16,
-        16,
-        32,
-      ), // Padding an toàn cho bottom bar
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
       child: ElevatedButton(
         onPressed: () {
-          // Xử lý logic khi nhấn nút Lưu
           print('Các tỉnh đã chọn: $_selectedProvinces');
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Đã lưu các lựa chọn!')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Đã lưu các lựa chọn!')),
+          );
         },
+        // <<< SỬA ĐỔI >>> Dùng màu từ theme
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF2196F3),
-          foregroundColor: Colors.white, // Đổi màu chữ thành trắng
+          backgroundColor: theme.colorScheme.primary,
+          foregroundColor: theme.colorScheme.onPrimary,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30.0),

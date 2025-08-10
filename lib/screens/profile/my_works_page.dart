@@ -5,12 +5,15 @@ class MyWorksPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // <<< THÊM MỚI >>> Lấy theme hiện tại để sử dụng
+    final theme = Theme.of(context);
+
     return Scaffold(
+      // <<< SỬA ĐỔI >>> AppBar sẽ tự động đổi màu theo theme
       appBar: AppBar(
-        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () {
             Navigator.pop(context); // Quay lại màn hình trước
           },
@@ -18,7 +21,6 @@ class MyWorksPage extends StatelessWidget {
         title: const Text(
           'Cập nhật sản phẩm cá nhân',
           style: TextStyle(
-            color: Colors.black,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -32,20 +34,20 @@ class MyWorksPage extends StatelessWidget {
             // Thông báo về nội dung tải lên
             const Text(
               'Nội dung tải lên không được chứa thông tin nhạy cảm và thông tin liên hệ cá nhân, chẳng hạn như mã QR, số điện thoại hoặc địa chỉ email, v.v.',
+              // <<< SỬA ĐỔI >>> Text sẽ tự động đổi màu
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey,
               ),
             ),
             const SizedBox(height: 20),
 
             // Phần thông tin tác phẩm
-            Text(
+            const Text(
               'Thông tin tác phẩm',
+              // <<< SỬA ĐỔI >>> Text sẽ tự động đổi màu
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.grey.shade800,
               ),
             ),
             const SizedBox(height: 10),
@@ -54,17 +56,17 @@ class MyWorksPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               elevation: 0,
-              color: Colors.white,
+              // <<< SỬA ĐỔI >>> Card sẽ tự động đổi màu
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: TextField(
                   maxLines: 5,
                   decoration: InputDecoration(
                     hintText: 'Vui lòng giới thiệu ngắn gọn về thông tin tác phẩm của bạn...',
-                    hintStyle: TextStyle(color: Colors.grey.shade400),
-                    border: InputBorder.none, // Bỏ đường viền của TextField
-                    counterText: '0/2000', // Hiển thị số ký tự
-                    counterStyle: TextStyle(color: Colors.grey.shade500),
+                    // <<< SỬA ĐỔI >>> hintStyle và counterStyle sẽ tự động đổi màu
+                    hintStyle: TextStyle(color: theme.hintColor),
+                    border: InputBorder.none,
+                    counterText: '0/2000',
                   ),
                   maxLength: 2000,
                 ),
@@ -73,12 +75,12 @@ class MyWorksPage extends StatelessWidget {
             const SizedBox(height: 20),
 
             // Phần tải hình ảnh lên
-            Text(
+            const Text(
               'Tải hình ảnh lên (0/12)',
+              // <<< SỬA ĐỔI >>> Text sẽ tự động đổi màu
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.grey.shade800,
               ),
             ),
             const SizedBox(height: 10),
@@ -87,7 +89,7 @@ class MyWorksPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               elevation: 0,
-              color: Colors.white,
+              // <<< SỬA ĐỔI >>> Card sẽ tự động đổi màu
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -97,18 +99,19 @@ class MyWorksPage extends StatelessWidget {
                       width: 100,
                       height: 100,
                       decoration: BoxDecoration(
-                        // Đã thay đổi style: BorderStyle.dashed thành BorderStyle.solid
-                        border: Border.all(color: Colors.grey.shade300, style: BorderStyle.solid),
+                        // <<< SỬA ĐỔI >>> Dùng màu viền từ theme
+                        border: Border.all(color: theme.dividerColor, style: BorderStyle.solid),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: IconButton(
-                        icon: Icon(Icons.add, size: 40, color: Colors.grey.shade500),
+                        // <<< SỬA ĐỔI >>> Icon sẽ tự động đổi màu
+                        icon: const Icon(Icons.add, size: 40),
                         onPressed: () {
                           // Xử lý khi nhấn nút thêm ảnh
                         },
                       ),
                     ),
-                    const SizedBox(height: 100), // Khoảng trống để mô phỏng không gian còn lại
+                    const SizedBox(height: 100), // Khoảng trống mô phỏng
                   ],
                 ),
               ),
@@ -122,11 +125,13 @@ class MyWorksPage extends StatelessWidget {
           onPressed: () {
             // Xử lý khi nhấn nút Lưu
           },
+          // <<< SỬA ĐỔI >>> Nút sẽ tự động lấy màu từ theme
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blueAccent, // Màu nền của nút
+            backgroundColor: theme.colorScheme.primary,
+            foregroundColor: theme.colorScheme.onPrimary,
             padding: const EdgeInsets.symmetric(vertical: 15),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12), // Bo tròn góc nút
+              borderRadius: BorderRadius.circular(12),
             ),
           ),
           child: const Text(
@@ -134,7 +139,6 @@ class MyWorksPage extends StatelessWidget {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
             ),
           ),
         ),

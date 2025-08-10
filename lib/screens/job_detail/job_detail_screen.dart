@@ -53,20 +53,18 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      // <<< SỬA ĐỔI >>> AppBar sẽ tự động đổi màu
       appBar: AppBar(
         title: Text(
           widget.job.name,
           style: const TextStyle(
-            color: Colors.black,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
         elevation: 0.5,
-        leading: const BackButton(color: Colors.black),
+        // actions và leading sẽ tự động đổi màu theo theme
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
@@ -121,9 +119,12 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   }
 
   Widget _buildJobHeader(BuildContext context) {
-    // Access properties directly from the Job object
+    // <<< THÊM MỚI >>> Lấy theme để sử dụng
+    final theme = Theme.of(context);
+
     return Container(
-      color: Colors.white,
+      // <<< SỬA ĐỔI >>> Dùng màu card từ theme
+      color: theme.cardColor,
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,10 +136,11 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           const SizedBox(height: 8),
           Text(
             widget.job.salary,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.red,
+              // <<< SỬA ĐỔI >>> Dùng màu error từ theme để nổi bật
+              color: theme.colorScheme.error,
             ),
           ),
           const SizedBox(height: 16),
@@ -146,40 +148,36 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             spacing: 8.0,
             runSpacing: 8.0,
             children: [
-              InfoChip(
-                icon: Icons.location_on_outlined,
-                text: widget.job.location,
-              ),
+              InfoChip(icon: Icons.location_on_outlined, text: widget.job.location),
               InfoChip(icon: Icons.work_outline, text: widget.job.experience),
-              InfoChip(
-                icon: Icons.school_outlined,
-                text: widget.job.educationLevel,
-              ),
+              InfoChip(icon: Icons.school_outlined, text: widget.job.educationLevel),
               InfoChip(icon: Icons.schedule_outlined, text: widget.job.jobType),
               InfoChip(icon: Icons.today_outlined, text: widget.job.postedDate),
             ],
           ),
-          // ... (rest of the header is fine)
         ],
       ),
     );
   }
 
   Widget _buildJobDetails(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return Container(
       margin: const EdgeInsets.only(top: 8),
-      color: Colors.white,
+      // <<< SỬA ĐỔI >>> Dùng màu card từ theme
+      color: theme.cardColor,
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Các SectionHeader và Text sẽ tự động đổi màu
           const SectionHeader(title: 'Chi tiết công việc'),
           const Text(
             'Mô Tả:',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           const SizedBox(height: 8),
-          // **REFACTORED**: Iterate directly over the list from the model
           ...widget.job.description
               .map((item) => BulletListItem(text: item))
               .toList(),
@@ -190,14 +188,12 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           const SizedBox(height: 8),
-          // **REFACTORED**: Iterate directly over the list
           ...widget.job.requirements
               .map((item) => BulletListItem(text: item))
               .toList(),
 
           const Divider(height: 32),
           const SectionHeader(title: 'Lợi ích công việc'),
-          // **REFACTORED**: Iterate directly over the list
           ...widget.job.benefits
               .map((item) => BulletListItem(text: item))
               .toList(),
@@ -206,9 +202,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           const SectionHeader(title: 'Địa chỉ làm việc'),
           Text(
             widget.job.workAddress,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(fontSize: 15, height: 1.5),
+            style: theme.textTheme.bodyMedium?.copyWith(fontSize: 15, height: 1.5),
           ),
           const SizedBox(height: 16),
           MapWidget(
@@ -216,9 +210,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             companyName: widget.job.companyName,
           ),
           const SizedBox(height: 24),
-
-          // This widget needs to be created or adapted to accept a Job object
-          // Assuming CompanyInfoCard(job: widget.job) is correct.
+          // Giả sử CompanyInfoCard đã được tối ưu hóa
           // CompanyInfoCard(job: widget.job),
         ],
       ),
@@ -226,35 +218,30 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   }
 
   Widget _buildBottomNavBar(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return SafeArea(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              spreadRadius: 1,
-              blurRadius: 10,
-            ),
-          ],
+          // <<< SỬA ĐỔI >>> Dùng màu từ theme
+          color: theme.cardColor,
           border: Border(
-            top: BorderSide(color: Colors.grey.shade200, width: 1),
+            top: BorderSide(color: theme.dividerColor, width: 0.5),
           ),
         ),
         child: Row(
           children: [
             Expanded(
               child: OutlinedButton.icon(
-                onPressed: () {
-                  /* TODO: Logic gửi CV */
-                },
+                onPressed: () { /* TODO: Logic gửi CV */ },
                 icon: const Icon(Icons.send_rounded),
                 label: const Text('Gửi CV'),
+                // Style của OutlinedButton thường tự thích ứng tốt
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   side: BorderSide(
-                    color: Theme.of(context).colorScheme.primary,
+                    color: theme.colorScheme.primary,
                   ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -265,15 +252,14 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             const SizedBox(width: 16),
             Expanded(
               child: ElevatedButton.icon(
-                onPressed: () {
-                  /* TODO: Logic liên hệ */
-                },
+                onPressed: () { /* TODO: Logic liên hệ */ },
                 icon: const Icon(Icons.chat_bubble_outline_rounded),
                 label: const Text('Liên hệ ngay'),
+                // <<< SỬA ĐỔI >>> Dùng màu từ theme
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Colors.white,
+                  backgroundColor: theme.colorScheme.primary,
+                  foregroundColor: theme.colorScheme.onPrimary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),

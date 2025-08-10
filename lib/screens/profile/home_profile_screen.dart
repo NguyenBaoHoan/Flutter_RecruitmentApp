@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../../../screens/profile/attach_cv_page.dart';
-import '../../../screens/profile/my_works_page.dart';
-import '../../../screens/profile/favorites_page.dart';
-import '../../../screens/profile/career_expectations_page.dart';
-import '../../../screens/profile/online_cv_page.dart';
-import '../../screens/home/user_home_screen.dart';
-import '../../widgets/nav_helper.dart';
-import '../../widgets/main_bottom_nav_bar.dart';
-import '../../../screens/profile/setting_screen.dart';
-
 import 'package:provider/provider.dart';
-import '../../providers/theme_provider.dart'; // Import theme provider
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../providers/theme_provider.dart';
+import '../../widgets/main_bottom_nav_bar.dart';
+import '../../widgets/nav_helper.dart';
+import '../profile/attach_cv_page.dart';
+import '../profile/career_expectations_page.dart';
+import '../profile/favorites_page.dart';
+import '../profile/my_works_page.dart';
+import '../profile/online_cv_page.dart';
+import '../profile/setting_screen.dart';
 
 class HomePageProfile extends StatefulWidget {
   const HomePageProfile({super.key});
@@ -41,43 +40,38 @@ class _HomePageProfileState extends State<HomePageProfile> {
 
   @override
   Widget build(BuildContext context) {
-    // <<< THÊM MỚI >>> Lấy themeProvider để sử dụng
+    // Lấy theme và themeProvider để sử dụng
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final theme = Theme.of(context);
 
     return Scaffold(
+      // <<< SỬA ĐỔI >>> AppBar sẽ tự động đổi màu
       appBar: AppBar(
-        backgroundColor: Colors.white, // Lưu ý: Màu này sẽ không còn tác dụng khi ở dark mode
         elevation: 0,
         leading: const SizedBox.shrink(),
         title: const Text(
           'Của tôi',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         actions: [
-          // <<< THÊM MỚI BẮT ĐẦU >>>
-          // Nút bấm chuyển đổi theme
+          // Nút chuyển theme (giữ nguyên)
           IconButton(
             icon: Icon(
-              // Thay đổi icon dựa trên theme hiện tại
               themeProvider.isDarkMode ? Icons.wb_sunny_outlined : Icons.nightlight_round,
-              color: Colors.black, // Tạm thời để màu đen
             ),
             onPressed: () {
-              // Gọi hàm toggleTheme khi nhấn nút
               Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
             },
           ),
-          // <<< THÊM MỚI KẾT THÚC >>>
-          
           IconButton(
-            icon: const Icon(Icons.headset_mic_outlined, color: Colors.black),
+            icon: const Icon(Icons.headset_mic_outlined),
             onPressed: () {
               // Xử lý khi nhấn nút hỗ trợ
             },
           ),
           IconButton(
-            icon: const Icon(Icons.settings_outlined, color: Colors.black),
+            icon: const Icon(Icons.settings_outlined),
             onPressed: () {
               Navigator.push(
                 context,
@@ -92,9 +86,9 @@ class _HomePageProfileState extends State<HomePageProfile> {
           children: [
             _buildProfileSection(context),
             const SizedBox(height: 20),
-            _buildStatsSection(),
+            _buildStatsSection(context), // <<< SỬA ĐỔI >>> Truyền context
             const SizedBox(height: 20),
-            _buildNavigationList(context), // Truyền context vào đây
+            _buildNavigationList(context),
           ],
         ),
       ),
@@ -109,25 +103,23 @@ class _HomePageProfileState extends State<HomePageProfile> {
   Widget _buildProfileSection(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
-      color: Colors.white,
+      // <<< SỬA ĐỔI >>> Xóa màu cố định
       child: Column(
         children: [
-          // Ảnh đại diện
           Container(
             width: 100,
             height: 100,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.purple.shade100, // Màu nền của avatar
+              color: Colors.purple.shade100, // Giữ màu nhấn
             ),
             child: const Icon(
               Icons.person,
               size: 60,
-              color: Colors.purple, // Màu icon person
+              color: Colors.purple, // Giữ màu nhấn
             ),
           ),
           const SizedBox(height: 10),
-          // Tên và nút chỉnh sửa
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -148,41 +140,44 @@ class _HomePageProfileState extends State<HomePageProfile> {
             ],
           ),
           const SizedBox(height: 5),
-          // Mô tả CV
           const Text(
             'CV trực tuyến',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
+            // <<< SỬA ĐỔI >>> Xóa màu cố định
+            style: TextStyle(fontSize: 16),
           ),
         ],
       ),
     );
   }
 
-  // Phần thống kê (Đã trò chuyện, Đã gửi CV, Chờ Phỏng Vấn)
-  Widget _buildStatsSection() {
+  // Phần thống kê
+  Widget _buildStatsSection(BuildContext context) { // <<< SỬA ĐỔI >>> Nhận context
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildStatCard('Đã trò chuyện', '0'),
-          _buildStatCard('Đã gửi CV', '0'),
-          _buildStatCard('Chờ Phỏng Vấn', '0'),
+          _buildStatCard(context, 'Đã trò chuyện', '0'), // <<< SỬA ĐỔI >>> Truyền context
+          _buildStatCard(context, 'Đã gửi CV', '0'), // <<< SỬA ĐỔI >>> Truyền context
+          _buildStatCard(context, 'Chờ Phỏng Vấn', '0'), // <<< SỬA ĐỔI >>> Truyền context
         ],
       ),
     );
   }
 
   // Thẻ thống kê
-  Widget _buildStatCard(String title, String count) {
+  Widget _buildStatCard(BuildContext context, String title, String count) { // <<< SỬA ĐỔI >>> Nhận context
+    final theme = Theme.of(context);
+
     return Expanded(
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 5),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12), // Bo tròn góc
+          borderRadius: BorderRadius.circular(12),
         ),
-        elevation: 0, // Không có đổ bóng
-        color: Colors.blue.shade50, // Màu nền của thẻ
+        elevation: 0,
+        // <<< SỬA ĐỔI >>> Dùng màu từ theme
+        color: theme.colorScheme.primaryContainer,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
           child: Column(
@@ -190,15 +185,20 @@ class _HomePageProfileState extends State<HomePageProfile> {
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 14, color: Colors.black87),
+                // <<< SỬA ĐỔI >>> Xóa màu cố định
+                style: TextStyle(
+                  fontSize: 14,
+                  color: theme.colorScheme.onPrimaryContainer,
+                ),
               ),
               const SizedBox(height: 5),
               Text(
                 count,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue,
+                  // <<< SỬA ĐỔI >>> Dùng màu chính của theme
+                  color: theme.colorScheme.primary,
                 ),
               ),
             ],
@@ -210,63 +210,15 @@ class _HomePageProfileState extends State<HomePageProfile> {
 
   // Danh sách các mục điều hướng
   Widget _buildNavigationList(BuildContext context) {
-    // Nhận context
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Column(
         children: [
-          _buildNavigationItem(
-            context, // Truyền context
-            Icons.description_outlined,
-            'CV trực tuyến',
-            () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const OnlineCVPage()),
-              );
-            },
-          ),
-          _buildNavigationItem(
-            context,
-            Icons.attach_file_outlined,
-            'Đính kèm CV',
-            () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AttachCVPage()),
-              );
-            },
-          ),
-          _buildNavigationItem(
-            context,
-            Icons.emoji_events_outlined,
-            'Kỳ vọng nghề nghiệp',
-            () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const CareerExpectationsPage(),
-                ),
-              );
-            },
-          ),
-          _buildNavigationItem(
-            context,
-            Icons.article_outlined,
-            'Tác phẩm của tôi',
-            () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const MyWorksPage()),
-              );
-            },
-          ),
-          _buildNavigationItem(context, Icons.favorite_outline, 'Thú vị', () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const FavoritesPage()),
-            );
-          }),
+            _buildNavigationItem(context, Icons.description_outlined, 'CV trực tuyến', () { Navigator.push(context, MaterialPageRoute(builder: (context) => const OnlineCVPage())); }),
+            _buildNavigationItem(context, Icons.attach_file_outlined, 'Đính kèm CV', () { Navigator.push(context, MaterialPageRoute(builder: (context) => const AttachCVPage())); }),
+            _buildNavigationItem(context, Icons.emoji_events_outlined, 'Kỳ vọng nghề nghiệp', () { Navigator.push(context, MaterialPageRoute(builder: (context) => const CareerExpectationsPage())); }),
+            _buildNavigationItem(context, Icons.article_outlined, 'Tác phẩm của tôi', () { Navigator.push(context, MaterialPageRoute(builder: (context) => const MyWorksPage())); }),
+            _buildNavigationItem(context, Icons.favorite_outline, 'Thú vị', () { Navigator.push(context, MaterialPageRoute(builder: (context) => const FavoritesPage())); }),
         ],
       ),
     );
@@ -282,18 +234,19 @@ class _HomePageProfileState extends State<HomePageProfile> {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12), // Bo tròn góc
+        borderRadius: BorderRadius.circular(12),
       ),
-      elevation: 0, // Không có đổ bóng
-      color: Colors.white, // Màu nền của thẻ
+      elevation: 0,
+      // <<< SỬA ĐỔI >>> Xóa màu cố định
       child: ListTile(
-        leading: Icon(icon, color: Colors.black87),
+        // <<< SỬA ĐỔI >>> Icon và Text sẽ tự động đổi màu
+        leading: Icon(icon),
         title: Text(
           title,
-          style: const TextStyle(fontSize: 16, color: Colors.black87),
+          style: const TextStyle(fontSize: 16),
         ),
-        trailing: const Icon(Icons.chevron_right, color: Colors.grey),
-        onTap: onTap, // Sử dụng callback onTap
+        trailing: const Icon(Icons.chevron_right),
+        onTap: onTap,
       ),
     );
   }
