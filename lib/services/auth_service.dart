@@ -1,32 +1,19 @@
 import 'dart:convert';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:job_finder_app/services/user_preferences_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart'; // Giữ nguyên model User của bạn
 import 'package:flutter/services.dart';
 
-// Class nhỏ để đóng gói kết quả đăng nhập (user và token)
 class AuthResult {
   final User user;
-  final String accessToken; 
-
+  final String accessToken;
   AuthResult({required this.user, required this.accessToken});
 }
 
 class AuthService {
-  // <<< GOOGLE SIGN-IN >>>
-  final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: ['email'],
-    serverClientId: '6579631510-ee6ofdl2djag0ghvuhgck7e5mknei6nf.apps.googleusercontent.com',
-  );
-
-  // URL tới backend 
-  // Dùng 'http://10.0.2.2:8080' cho máy ảo Android.
-  // Dùng IP thật của máy tính (ví dụ: 'http://192.168.1.5:8080') nếu test trên điện thoại thật.
   final String _baseUrl = 'http://10.0.2.2:8080/api/v1/auth';
 
-
-  /// <<< THÊM MỚI >>> Phương thức đăng ký tài khoản mới
   Future<bool> register({
     required String name,
     required String email,
@@ -37,11 +24,7 @@ class AuthService {
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'name': name,
-          'email': email,
-          'password': password,
-        }),
+        body: jsonEncode({'name': name, 'email': email, 'password': password}),
       );
 
       if (response.statusCode == 200) {
@@ -59,74 +42,13 @@ class AuthService {
     }
   }
 
-
-  /// Phương thức đăng nhập bằng Google
-  Future<AuthResult?> signInWithGoogle() async {
-    try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) {
-        print('Đăng nhập Google đã bị hủy.');
-        return null;
-      }
-
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      final String? idToken = googleAuth.idToken;
-
-      if (idToken == null) {
-        // Trường hợp này hiếm khi xảy ra nếu googleUser không null, nhưng vẫn kiểm tra
-        throw Exception('Không lấy được Google ID Token sau khi xác thực.');
-      }
-
-      // Gửi token lên backend... (code này giữ nguyên)
-      final response = await http.post(
-        Uri.parse('$_baseUrl/google'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'token': idToken}),
-      );
-
-      if (response.statusCode == 200) {
-        final responseBody = jsonDecode(response.body);
-        final User user = User.fromJson(responseBody['user']);
-        final String accessToken = responseBody['accessToken'];
-        return AuthResult(user: user, accessToken: accessToken);
-      } else {
-        print('Lỗi từ backend: ${response.statusCode} - ${response.body}');
-        await _googleSignIn.signOut();
-        return null;
-      }
-    } 
-    // <<< BẮT LỖI CHI TIẾT Ở ĐÂY >>>
-    on PlatformException catch (e) {
-      print('!!! LỖI PlatformException KHI ĐĂNG NHẬP GOOGLE:');
-      print('    Mã lỗi (code): ${e.code}'); 
-      print('    Thông báo (message): ${e.message}');
-      print('    Chi tiết (details): ${e.details}');
-      return null;
-    } catch (e) {
-      print('!!! Lỗi chung trong quá trình signInWithGoogle: $e');
-      return null;
-    }
-  }
-
-  /// Phương thức đăng xuất google account
-  Future<void> signOut() async {
-    await _googleSignIn.signOut();
-    // TODO: xoá accessToken đã lưu trên thiết bị
-    // Tại đây bạn cũng cần xóa token đã lưu trong bộ nhớ của app
-    print('Đã đăng xuất.');
-  }
-
-
-  /// Phương thức đăng nhập bằng email/mật khẩu 
+  /// Phương thức đăng nhập bằng email/mật khẩu
   Future<User?> login(String email, String password) async {
     final url = Uri.parse('$_baseUrl/login');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        "userName": email,
-        "passWord": password,
-      }),
+      body: jsonEncode({"userName": email, "passWord": password}),
     );
 
     if (response.statusCode == 200) {
@@ -139,5 +61,46 @@ class AuthService {
       }
     }
     return null;
+  }
+
+  Future<bool> changePassword(String oldPassword, String newPassword) async {
+    // Lấy token đã lưu của người dùng
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('accessToken');
+
+    if (token == null) {
+      print('Lỗi: Không tìm thấy token người dùng.');
+      return false;
+    }
+
+    // URL tới backend. Lưu ý: endpoint này nằm trong UserController nên có thể không có /auth
+    final url = Uri.parse('http://10.0.2.2:8080/api/v1/users/change-password');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token', // Gửi token để xác thực
+        },
+        body: jsonEncode({
+          'oldPassword': oldPassword,
+          'newPassword': newPassword,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print('Đổi mật khẩu thành công.');
+        return true;
+      } else {
+        print(
+          'Lỗi đổi mật khẩu từ backend: ${response.statusCode} - ${response.body}',
+        );
+        return false;
+      }
+    } catch (e) {
+      print('Lỗi mạng khi đổi mật khẩu: $e');
+      return false;
+    }
   }
 }
