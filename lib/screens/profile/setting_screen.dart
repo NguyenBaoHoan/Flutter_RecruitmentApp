@@ -101,10 +101,9 @@ class SettingScreen extends StatelessWidget {
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: const [
-              // <<< SỬA ĐỔI >>> Text và Icon sẽ tự động đổi màu
-              Text('Người tìm việc'),
+              Text('Người tìm việc', style: TextStyle(color: Colors.black54)),
               SizedBox(width: 4),
-              Icon(Icons.arrow_forward_ios, size: 16),
+              Icon(Icons.arrow_forward_ios, size: 16, color: Colors.black38),
             ],
           ),
           onTap: () {
@@ -117,8 +116,7 @@ class SettingScreen extends StatelessWidget {
   }
 
   Future<void> _logout(BuildContext context) async {
-    final theme = Theme.of(context); // <<< THÊM MỚI >>> Lấy theme cho Dialog
-
+    // Hiển thị dialog xác nhận
     final shouldLogout = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
@@ -132,17 +130,15 @@ class SettingScreen extends StatelessWidget {
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: Text(
+              child: const Text(
                 'Đăng xuất',
-                // <<< SỬA ĐỔI >>> Dùng màu error từ theme
-                style: TextStyle(color: theme.colorScheme.error),
+                style: TextStyle(color: Colors.red),
               ),
             ),
           ],
         );
       },
     );
-
 
     if (shouldLogout == true) {
       // Xóa dữ liệu đăng nhập từ SharedPreferences

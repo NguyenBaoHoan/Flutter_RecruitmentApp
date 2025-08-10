@@ -50,6 +50,9 @@ dependencies:
   printing: ^5.11.0
   path_provider: ^2.1.1
 
+  # Icon app
+  flutter_launcher_icons: "^0.13.1" 
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -73,3 +76,9 @@ flutter:
         - asset: assets/fonts/Inter-Regular.ttf
         - asset: assets/fonts/Inter-Bold.ttf
           weight: 700
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/Icon_app.jpg"
+  min_sdk_android: 21 
