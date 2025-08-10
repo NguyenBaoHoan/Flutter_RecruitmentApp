@@ -9,7 +9,6 @@ android {
     namespace = "com.example.job_finder_app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
-    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -19,12 +18,22 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.toString()
     }
+    
+    // <<< THÊM MỚI BẮT ĐẦU >>>
+    // Khối này chỉ định rõ ràng file keystore dùng cho việc ký ứng dụng,
+    // giúp đảm bảo mã SHA-1 luôn nhất quán.
+    signingConfigs {
+        getByName("debug") {
+            storeFile = file("../../keystore/debug.keystore") // Đường dẫn tương đối đến file keystore
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+    // <<< THÊM MỚI KẾT THÚC >>>
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.job_finder_app"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -33,8 +42,6 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
         }
     }

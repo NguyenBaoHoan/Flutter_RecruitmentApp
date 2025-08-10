@@ -46,6 +46,52 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _loginWithGoogle() async {
+    // Hiển thị vòng xoay loading để người dùng biết app đang xử lý
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    final authResult = await _authService.signInWithGoogle();
+
+    // Ẩn vòng xoay loading
+    Navigator.of(context).pop();
+
+    if (authResult != null) {
+      // Đăng nhập thành công!
+      print('Đăng nhập Google thành công!');
+      print('Tên người dùng: ${authResult.user.name}');
+      print('Access Token của backend: ${authResult.accessToken}');
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Đăng nhập thành công! Xin chào ${authResult.user.name}')),
+      );
+
+      // Lưu lại token và trạng thái đăng nhập
+      // (Quan trọng: Lưu accessToken của backend, không phải của Google)
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', true);
+      await prefs.setString('accessToken', authResult.accessToken);
+      await prefs.setString('user_name', authResult.user.name);
+      await prefs.setString('user_email', authResult.user.email);
+      
+      // Chuyển sang màn hình chính
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const AuthGate()),
+        (route) => false,
+      );
+
+    } else {
+      // Đăng nhập thất bại
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Đăng nhập Google thất bại! Vui lòng thử lại.')),
+      );
+    }
+  }
+
   Future<void> _login() async {
     final user = await _authService.login(
       _emailController.text,
@@ -211,9 +257,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     // TODO: Login with Email
                   }),
                   const SizedBox(width: 20),
-                  _buildSocialButton(FontAwesomeIcons.google, () {
-                    // TODO: Login with Google
-                  }),
+                  _buildSocialButton(FontAwesomeIcons.google, _loginWithGoogle), 
+                  // TODO: Login with Google
+                  
                   const SizedBox(width: 20),
                   _buildSocialButton(FontAwesomeIcons.comment, () {
                     // TODO: Login with Zalo - Cần icon Zalo riêng
