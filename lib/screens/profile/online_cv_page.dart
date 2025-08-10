@@ -7,7 +7,7 @@ class OnlineCVPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // <<< SỬA ĐỔI >>> AppBar sẽ tự động đổi màu theo theme
+      // AppBar sẽ tự động đổi màu theo theme
       appBar: AppBar(
         elevation: 0,
         leading: IconButton(
@@ -18,9 +18,7 @@ class OnlineCVPage extends StatelessWidget {
         ),
         title: const Text(
           'Nguyễn Văn Nghĩa', // Tên người dùng hiển thị trên AppBar
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         actions: [
@@ -87,11 +85,10 @@ class OnlineCVPage extends StatelessWidget {
   }
 
   // Thẻ thông tin cá nhân
-  Widget _buildPersonalInfoCard(BuildContext context) { // <<< SỬA ĐỔI >>> Nhận context
+  Widget _buildPersonalInfoCard(BuildContext context) {
+    // <<< SỬA ĐỔI >>> Nhận context
     return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 0,
       // <<< SỬA ĐỔI >>> Xóa màu cố định, Card sẽ tự lấy màu từ theme
       child: Padding(
@@ -118,10 +115,7 @@ class OnlineCVPage extends StatelessWidget {
                 const Text(
                   'Nguyễn Văn Nghĩa',
                   // <<< SỬA ĐỔI >>> Xóa màu cố định
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -146,10 +140,7 @@ class OnlineCVPage extends StatelessWidget {
           // <<< SỬA ĐỔI >>> Icon và Text sẽ tự động đổi màu
           Icon(icon, size: 20),
           const SizedBox(width: 10),
-          Text(
-            text,
-            style: const TextStyle(fontSize: 16),
-          ),
+          Text(text, style: const TextStyle(fontSize: 16)),
         ],
       ),
     );
@@ -165,9 +156,7 @@ class OnlineCVPage extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 0,
       // <<< SỬA ĐỔI >>> Xóa màu cố định
       child: Padding(

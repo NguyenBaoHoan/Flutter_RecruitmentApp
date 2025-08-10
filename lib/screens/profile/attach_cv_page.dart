@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/upload_file_service.dart';
 
+// Trang đính kèm CV cho hồ sơ cá nhân
 class AttachCVPage extends StatefulWidget {
   const AttachCVPage({super.key});
 
@@ -12,8 +13,8 @@ class AttachCVPage extends StatefulWidget {
 }
 
 class _AttachCVPageState extends State<AttachCVPage> {
-  String? uploadedCV; // Tên file CV đã upload
-  bool isUploading = false; // Trạng thái đang upload
+  String? uploadedCV; // Tên file CV đã upload (lấy từ backend)
+  bool isUploading = false; // Trạng thái đang upload file
   int? currentUserId; // ID người dùng hiện tại
 
   @override
@@ -22,26 +23,27 @@ class _AttachCVPageState extends State<AttachCVPage> {
     _loadCurrentUserCV(); // Tải CV khi vào trang
   }
 
-  // Hàm tải CV hiện tại từ backend
+  // Hàm tải CV hiện tại của user từ backend
   Future<void> _loadCurrentUserCV() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
 
+      // Debug: In ra các key trong SharedPreferences
       print('=== DEBUG SharedPreferences ===');
       print('All keys in prefs: ${prefs.getKeys()}');
 
-      // ✅ SỬA: Chỉ dùng getInt vì user_id được lưu dưới dạng int
+      // Lấy user_id từ local (được lưu dưới dạng int)
       currentUserId = prefs.getInt('user_id');
-
       print('user_id from prefs: $currentUserId');
 
       if (currentUserId != null) {
         print('✅ Found user_id: $currentUserId');
 
-        // Gọi API lấy tên file CV
+        // Gọi API lấy tên file CV của user
         String? cvFileName = await FileService.getCurrentUserCV(currentUserId!);
         print('CV fileName from API: $cvFileName');
 
+        // Nếu có file CV thì cập nhật lên giao diện
         if (cvFileName != null && cvFileName.isNotEmpty) {
           setState(() {
             uploadedCV = cvFileName;
@@ -57,12 +59,11 @@ class _AttachCVPageState extends State<AttachCVPage> {
 
   // Hàm upload CV lên backend
   Future<void> uploadCV() async {
-    // ✅ THÊM DEBUG
     print('=== DEBUG Upload CV ===');
     print('currentUserId: $currentUserId');
 
+    // Nếu chưa có userId thì thử lấy lại từ SharedPreferences
     if (currentUserId == null) {
-      // ✅ THÊM: Thử load lại user từ SharedPreferences
       await _loadCurrentUserCV();
 
       if (currentUserId == null) {
@@ -73,7 +74,7 @@ class _AttachCVPageState extends State<AttachCVPage> {
       }
     }
 
-    // Chọn file từ thiết bị
+    // Chọn file từ thiết bị (chỉ cho phép các định dạng phổ biến)
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf', 'doc', 'docx', 'jpg', 'png'],
@@ -85,19 +86,19 @@ class _AttachCVPageState extends State<AttachCVPage> {
       });
 
       File file = File(result.files.single.path!);
-      // Gọi API upload CV
+      // Gọi API upload CV lên server
       String? uploadResult = await FileService.uploadCV(file, currentUserId!);
 
       if (uploadResult != null) {
         setState(() {
-          uploadedCV = uploadResult; // Dùng tên file trả về từ server
+          uploadedCV = uploadResult; // Cập nhật tên file trả về từ server
           isUploading = false;
         });
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('Upload CV thành công!')));
 
-        // Reload để lấy file mới nhất
+        // Reload lại để lấy file mới nhất
         await _loadCurrentUserCV();
       } else {
         setState(() {
@@ -114,6 +115,7 @@ class _AttachCVPageState extends State<AttachCVPage> {
   Future<void> deleteCV() async {
     if (currentUserId == null) return;
 
+    // Gọi API xóa file CV
     bool success = await FileService.deleteCV(currentUserId!);
     if (success) {
       setState(() {
@@ -157,7 +159,7 @@ class _AttachCVPageState extends State<AttachCVPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Thông báo về định dạng file
+            // Thông báo về định dạng file hỗ trợ
             const Text(
               'Nên sử dụng tệp PDF cho CV. Các định dạng DOC, DOCX, JPG và PNG đều được hỗ trợ, kích thước không quá 20M.',
               style: TextStyle(fontSize: 14),
@@ -170,11 +172,12 @@ class _AttachCVPageState extends State<AttachCVPage> {
                 borderRadius: BorderRadius.circular(12),
               ),
               elevation: 0,
-              color: const Color(0xFF6A5ACD), // Giữ màu tím làm điểm nhấn
+              color: const Color(0xFF6A5ACD), // Màu tím làm điểm nhấn
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
                   children: [
+                    // Thông tin mô tả
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -198,6 +201,7 @@ class _AttachCVPageState extends State<AttachCVPage> {
                         ],
                       ),
                     ),
+                    // Ảnh minh họa CV
                     Image.network(
                       'https://placehold.co/80x80/6A5ACD/white?text=CV',
                       width: 80,
@@ -223,8 +227,8 @@ class _AttachCVPageState extends State<AttachCVPage> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+                          // Ảnh placeholder khi chưa có CV
                           Image.network(
-                            // Thay đổi màu ảnh placeholder theo theme
                             isDarkMode
                                 ? 'https://placehold.co/200x200/303030/grey?text=No+Data'
                                 : 'https://placehold.co/200x200/white/grey?text=No+Data',
@@ -234,7 +238,6 @@ class _AttachCVPageState extends State<AttachCVPage> {
                               return Icon(
                                 Icons.image_not_supported_outlined,
                                 size: 100,
-                                // Lấy màu icon từ theme
                                 color: theme.dividerColor,
                               );
                             },
@@ -255,16 +258,16 @@ class _AttachCVPageState extends State<AttachCVPage> {
                         padding: const EdgeInsets.all(16.0),
                         child: Row(
                           children: [
+                            // Widget preview CV (ảnh hoặc icon file)
                             _buildCVPreview(uploadedCV!),
                             const SizedBox(width: 16),
+                            // Thông tin tên file CV
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    _getDisplayName(
-                                      uploadedCV!,
-                                    ), // Hiển thị tên thân thiện
+                                    _getDisplayName(uploadedCV!),
                                     style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
@@ -281,6 +284,7 @@ class _AttachCVPageState extends State<AttachCVPage> {
                                 ],
                               ),
                             ),
+                            // Nút xóa CV
                             IconButton(
                               onPressed: deleteCV,
                               icon: const Icon(Icons.delete, color: Colors.red),
@@ -293,15 +297,14 @@ class _AttachCVPageState extends State<AttachCVPage> {
           ],
         ),
       ),
+      // Nút upload CV ở dưới cùng màn hình
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ElevatedButton(
           onPressed: uploadedCV == null && !isUploading ? uploadCV : null,
-          // Nút sẽ tự động lấy màu từ theme
           style: ElevatedButton.styleFrom(
-            backgroundColor:
-                theme.colorScheme.primary, // Lấy màu chính của theme
-            foregroundColor: theme.colorScheme.onPrimary, // Lấy màu chữ phù hợp
+            backgroundColor: theme.colorScheme.primary,
+            foregroundColor: theme.colorScheme.onPrimary,
             padding: const EdgeInsets.symmetric(vertical: 15),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -321,10 +324,11 @@ class _AttachCVPageState extends State<AttachCVPage> {
     );
   }
 
+  // Widget preview CV (ảnh hoặc icon file)
   Widget _buildCVPreview(String fileName) {
     final ext = fileName.split('.').last.toLowerCase();
     final isImage = ['jpg', 'jpeg', 'png'].contains(ext);
-    // Sử dụng tên file đầy đủ (bao gồm timestamp)
+    // Đường dẫn file trên server
     final url = 'http://192.168.1.2:8080/uploads/uploads/$fileName';
 
     return GestureDetector(
@@ -332,6 +336,7 @@ class _AttachCVPageState extends State<AttachCVPage> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: isImage
+            // Nếu là ảnh thì hiển thị ảnh
             ? Image.network(
                 url,
                 width: 120,
@@ -351,6 +356,7 @@ class _AttachCVPageState extends State<AttachCVPage> {
                   ),
                 ),
               )
+            // Nếu là file PDF/DOC thì hiển thị icon
             : Container(
                 width: 120,
                 height: 120,
@@ -370,17 +376,17 @@ class _AttachCVPageState extends State<AttachCVPage> {
     );
   }
 
-  // Hàm hiển thị tên file thân thiện (không có timestamp)
+  // Hàm hiển thị tên file thân thiện (bỏ timestamp/uuid nếu có)
   String _getDisplayName(String fileName) {
     if (fileName.contains('-') && fileName.split('-').length >= 3) {
       // Bỏ timestamp và UUID, chỉ lấy tên gốc
       final parts = fileName.split('-');
-      return parts.sublist(2).join('-'); // Từ phần thứ 3 trở đi
+      return parts.sublist(2).join('-');
     }
     return fileName;
   }
 
-  // Thêm hàm mở viewer
+  // Hàm mở viewer cho file CV (ảnh hoặc PDF/DOC)
   void _openCVViewer(String fileName) {
     final ext = fileName.split('.').last.toLowerCase();
     final isImage = ['jpg', 'jpeg', 'png'].contains(ext);
@@ -441,7 +447,7 @@ class _ImageViewer extends StatelessWidget {
   }
 }
 
-// Widget xem PDF/DOC
+// Widget xem PDF/DOC (chỉ hiển thị icon và tên, không render nội dung file)
 class _PDFViewer extends StatelessWidget {
   final String pdfUrl;
   final String fileName;
@@ -499,8 +505,8 @@ class _PDFViewer extends StatelessWidget {
     );
   }
 
+  // Hàm hiển thị dialog chứa URL file để tải xuống
   void _downloadFile(BuildContext context) {
-    // Hiển thị URL để user copy hoặc mở
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -523,8 +529,8 @@ class _PDFViewer extends StatelessWidget {
     );
   }
 
+  // Hàm hiển thị snackbar với URL file (có thể mở rộng để copy hoặc mở bằng url_launcher)
   void _openInBrowser(BuildContext context) {
-    // Hiển thị URL hoặc dùng url_launcher nếu có package
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Mở URL: $pdfUrl'),
