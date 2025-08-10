@@ -5,7 +5,7 @@ import '../models/chat_room.dart';
 
 class ChatApiService {
   static const String _baseUrl =
-      'http://10.0.2.2:8080'; // Sử dụng localhost cho backend Java Spring Boot khi chạy Flutter mobile
+      'http://192.168.1.2:8080'; // Sử dụng localhost cho backend Java Spring Boot khi chạy Flutter mobile
 
   // Lấy lịch sử tin nhắn của một phòng chat
   Future<List<ChatMessage>> getChatHistory(String roomId) async {

@@ -4,14 +4,11 @@ import '../models/user_model.dart';
 
 class AuthService {
   Future<User?> login(String email, String password) async {
-    final url = Uri.parse('http://10.0.2.2:8080/api/v1/auth/login');
+    final url = Uri.parse('http://192.168.1.2:8080/api/v1/auth/login');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        "userName": email,
-        "passWord": password,
-      }),
+      body: jsonEncode({"userName": email, "passWord": password}),
     );
 
     if (response.statusCode == 200) {
