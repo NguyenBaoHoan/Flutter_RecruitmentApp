@@ -25,6 +25,7 @@ class AuthService {
         url,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'name': name, 'email': email, 'password': password}),
+
       );
 
       if (response.statusCode == 200) {
