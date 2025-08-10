@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:job_finder_app/screens/profile/notification_settings_screen.dart';
+import 'package:job_finder_app/screens/profile/storage_management_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../login/auth_gate.dart';
 
@@ -29,12 +31,32 @@ class SettingScreen extends StatelessWidget {
           Expanded(
             child: ListView(
               children: [
-                _buildSettingItem('Trung tâm bảo mật tài khoản'),
-                _buildSettingItem('Thông báo và nhắc nhở'),
-                _buildSettingItem('Quản lý không gian lưu trữ'),
-                _buildSettingItem('Từ Thường dùng'),
-                _buildSettingItem('Danh sách đen'),
-                _buildSettingItem('Bảo vệ quyền riêng tư'),
+                _buildSettingItem(title: 'Trung tâm bảo mật tài khoản'),
+                _buildSettingItem(
+                  title: 'Thông báo và nhắc nhở',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              const NotificationSettingsScreen()),
+                    );
+                  },
+                ),
+                _buildSettingItem(
+                  title: 'Quản lý không gian lưu trữ',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => 
+                            const StorageManagementScreen()),
+                    );
+                  }
+                ),
+                _buildSettingItem(title: 'Từ Thường dùng'),
+                _buildSettingItem(title: 'Danh sách đen'),
+                _buildSettingItem(title: 'Bảo vệ quyền riêng tư'),
                 _buildRoleSwitchItem(),
               ],
             ),
@@ -71,19 +93,17 @@ class SettingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSettingItem(String title) {
+  Widget _buildSettingItem({required String title, VoidCallback? onTap}) {
     return Column(
       children: [
         ListTile(
           title: Text(title, style: const TextStyle(fontSize: 16)),
-          // <<< SỬA ĐỔI >>> Icon sẽ tự động đổi màu
+          // Icon sẽ tự động đổi màu theo theme
           trailing: const Icon(
             Icons.arrow_forward_ios,
             size: 16,
           ),
-          onTap: () {
-            // TODO: Xử lý chuyển trang tương ứng
-          },
+          onTap: onTap,
         ),
         const Divider(height: 1, thickness: 0.5, indent: 16, endIndent: 16),
       ],
