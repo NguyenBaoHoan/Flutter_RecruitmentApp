@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
+import 'package:job_finder_app/services/user_preferences_service.dart';
 import '../models/user_model.dart'; // Giữ nguyên model User của bạn
 
 // Class nhỏ để đóng gói kết quả đăng nhập (user và token)
