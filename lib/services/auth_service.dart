@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/user_model.dart';
+import 'user_preferences_service.dart';
 
 class AuthService {
   Future<User?> login(String email, String password) async {
@@ -17,7 +18,10 @@ class AuthService {
     if (response.statusCode == 200) {
       final Map<String, dynamic> json = jsonDecode(response.body);
       if (json['data'] != null && json['data']['user'] != null) {
-        return User.fromJson(json['data']['user']);
+        final user = User.fromJson(json['data']['user']);
+        // Lưu user vào SharedPreferences
+        await UserPreferencesService.saveUser(user);
+        return user;
       }
     }
     return null;

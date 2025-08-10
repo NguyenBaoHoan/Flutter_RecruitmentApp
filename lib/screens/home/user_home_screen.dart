@@ -8,6 +8,7 @@ import '../../widgets/job_detail/job_card.dart';
 import '../choose_area/choose_area_screen.dart';
 import '../../screens/job_detail/job_detail_screen.dart';
 import '../../screens/search/search_screen.dart';
+import '../../services/job_api_service.dart';
 
 class UserHomeScreen extends StatefulWidget {
   const UserHomeScreen({Key? key}) : super(key: key);
@@ -17,81 +18,34 @@ class UserHomeScreen extends StatefulWidget {
 }
 
 class _UserHomeScreenState extends State<UserHomeScreen> {
-  // Dữ liệu mẫu
-  final List<Job> jobs = [
-    Job(
-      name: 'Nhân Viên Lễ Tân Kiêm Sale',
-      companyName: 'CÔNG TY CỔ PHẦN ĐẦU TƯ XÂY DỰNG BẤT ĐỘNG SẢN HOÀNG TRIỀU',
-      salary: '10-12 Triệu',
-      location: 'Bình Thạnh - Hồ Chí Minh',
-      postedDate: 'Hôm nay',
-      companyLogoAsset: '',
-      experience: '1-3 năm',
-      educationLevel: 'Cao đẳng',
-      jobType: 'Toàn thời gian',
-      description: ['Mô tả công việc'],
-      requirements: ['Yêu cầu công việc'],
-      benefits: ['Phúc lợi'],
-      workAddress: 'Bình Thạnh - Hồ Chí Minh',
-      locationCompany: 'Bình Thạnh - Hồ Chí Minh',
-      companySize: '50-100 nhân viên',
-      companyIndustry: 'Bất động sản',
-    ),
-    Job(
-      name: 'Chuyên Viên Kế Toán Tổng Hợp',
-      companyName: 'CÔNG TY CỔ PHẦN CÔNG NGHỆ VÀ DỊCH VỤ DỮ LIỆU SỐ TDS',
-      salary: '18-20 Triệu',
-      location: 'Cầu Giấy - Hà Nội',
-      postedDate: 'Hôm nay',
-      companyLogoAsset: '',
-      experience: '3-5 năm',
-      educationLevel: 'Đại học',
-      jobType: 'Toàn thời gian',
-      description: ['Mô tả công việc'],
-      requirements: ['Yêu cầu công việc'],
-      benefits: ['Phúc lợi'],
-      workAddress: 'Cầu Giấy - Hà Nội',
-      locationCompany: 'Cầu Giấy - Hà Nội',
-      companySize: '100-200 nhân viên',
-      companyIndustry: 'Công nghệ',
-    ),
-    Job(
-      name: 'Nhân Viên Kinh Doanh Thuốc Thủy Sản',
-      companyName: 'CÔNG TY TNHH HÓA CHẤT THỊNH THỊNH',
-      salary: 'Thỏa thuận',
-      location: 'Thủ Đức - Hồ Chí Minh',
-      postedDate: 'Hôm nay',
-      companyLogoAsset: '',
-      experience: '1-3 năm',
-      educationLevel: 'Cao đẳng',
-      jobType: 'Toàn thời gian',
-      description: ['Mô tả công việc'],
-      requirements: ['Yêu cầu công việc'],
-      benefits: ['Phúc lợi'],
-      workAddress: 'Thủ Đức - Hồ Chí Minh',
-      locationCompany: 'Thủ Đức - Hồ Chí Minh',
-      companySize: '50-100 nhân viên',
-      companyIndustry: 'Hóa chất',
-    ),
-    Job(
-      name: 'Nhân Viên Kinh Doanh',
-      companyName: 'CÔNG TY TNHH FLUMA TECH',
-      salary: 'Thỏa thuận',
-      location: 'Quận 7 - Hồ Chí Minh',
-      postedDate: 'Hôm qua',
-      companyLogoAsset: '',
-      experience: '1-3 năm',
-      educationLevel: 'Cao đẳng',
-      jobType: 'Toàn thời gian',
-      description: ['Mô tả công việc'],
-      requirements: ['Yêu cầu công việc'],
-      benefits: ['Phúc lợi'],
-      workAddress: 'Quận 7 - Hồ Chí Minh',
-      locationCompany: 'Quận 7 - Hồ Chí Minh',
-      companySize: '20-50 nhân viên',
-      companyIndustry: 'Công nghệ',
-    ),
-  ];
+  // Dùng API thay cho dữ liệu mẫu
+  final JobApiService _jobApi = JobApiService();
+  final List<Job> jobs = [];
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchJobs();
+  }
+
+  Future<void> _fetchJobs() async {
+    try {
+      final data = await _jobApi.getAllJobs();
+      setState(() {
+        jobs
+          ..clear()
+          ..addAll(data);
+        _loading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _loading = false;
+      });
+    }
+  }
 
   int _selectedIndex = 0;
 
@@ -110,12 +64,16 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
             _buildResumeAlert(),
             _buildFilterChips(),
             Expanded(
-              child: ListView.builder(
-                itemCount: jobs.length,
-                itemBuilder: (context, index) {
-                  return JobCard(job: jobs[index].toMap());
-                },
-              ),
+              child: _loading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _error != null
+                  ? Center(child: Text('Lỗi: $_error'))
+                  : ListView.builder(
+                      itemCount: jobs.length,
+                      itemBuilder: (context, index) {
+                        return JobCard(job: jobs[index].toMap());
+                      },
+                    ),
             ),
           ],
         ),
@@ -180,7 +138,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           if (icon == Icons.search) {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) =>  SearchScreen()),
+              MaterialPageRoute(builder: (context) => SearchScreen()),
             );
           }
           // Xử lý các icon khác nếu cần
