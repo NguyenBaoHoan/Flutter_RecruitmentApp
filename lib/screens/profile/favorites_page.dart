@@ -17,12 +17,11 @@ class _FavoritesPageState extends State<FavoritesPage>
   late TabController _tabController;
   final FavoriteJobService _favoriteJobService = FavoriteJobService();
 
-  // **REFACTORED**: Use List<Job>
   List<Job> _favoriteJobs = [];
   bool _isLoading = true;
   String? _error;
   int? _userId;
-  int _jobCount = 0; // Thêm biến đếm số lượng job
+  int _jobCount = 0;
 
   @override
   void initState() {
@@ -36,6 +35,7 @@ class _FavoritesPageState extends State<FavoritesPage>
     _tabController.dispose();
     super.dispose();
   }
+
 
   Future<void> _loadInitialData() async {
     setState(() {
@@ -87,7 +87,7 @@ class _FavoritesPageState extends State<FavoritesPage>
         _jobCount = count;
       });
     } catch (e) {
-      print('❌ [FAVORITES PAGE] Error loading job count: $e');
+      print('[FAVORITES PAGE] Error loading job count: $e');
       // Không set error vì đây không phải lỗi nghiêm trọng
     }
   }
@@ -101,12 +101,15 @@ class _FavoritesPageState extends State<FavoritesPage>
 
   @override
   Widget build(BuildContext context) {
+    // <<< THÊM MỚI >>> Lấy theme hiện tại
+    final theme = Theme.of(context);
+    
     return Scaffold(
+      // <<< SỬA ĐỔI >>> AppBar sẽ tự động đổi màu theo theme
       appBar: AppBar(
-        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -116,7 +119,6 @@ class _FavoritesPageState extends State<FavoritesPage>
             const Text(
               'Thú vị',
               style: TextStyle(
-                color: Colors.black,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -124,7 +126,8 @@ class _FavoritesPageState extends State<FavoritesPage>
               Text(
                 '$_jobCount công việc',
                 style: TextStyle(
-                  color: Colors.grey[600],
+                  // <<< SỬA ĐỔI >>> Lấy màu phụ từ theme
+                  color: theme.textTheme.bodySmall?.color,
                   fontSize: 15,
                   fontWeight: FontWeight.normal,
                 ),
@@ -132,11 +135,13 @@ class _FavoritesPageState extends State<FavoritesPage>
           ],
         ),
         centerTitle: true,
+        // <<< SỬA ĐỔI >>> TabBar sẽ tự động đổi màu theo theme
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: Colors.blueAccent,
-          labelColor: Colors.blueAccent,
-          unselectedLabelColor: Colors.grey,
+          // Lấy màu từ colorScheme của theme để đảm bảo tương thích
+          indicatorColor: theme.colorScheme.primary,
+          labelColor: theme.colorScheme.primary,
+          unselectedLabelColor: theme.unselectedWidgetColor,
           labelStyle: const TextStyle(fontWeight: FontWeight.bold),
           tabs: const [
             Tab(text: 'Vị trí'),
@@ -167,7 +172,6 @@ class _FavoritesPageState extends State<FavoritesPage>
       return const Center(child: Text('Bạn chưa lưu công việc nào.'));
     }
 
-    // **INTEGRATED**: Use RefreshIndicator and the new FavoriteJobCard
     return RefreshIndicator(
       onRefresh: _loadInitialData,
       child: ListView.builder(

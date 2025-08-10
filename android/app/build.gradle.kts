@@ -3,6 +3,7 @@ plugins {
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+    id("com.google.gms.google-services") 
 }
 
 android {
@@ -19,18 +20,14 @@ android {
         jvmTarget = JavaVersion.VERSION_11.toString()
     }
     
-    // <<< THÊM MỚI BẮT ĐẦU >>>
-    // Khối này chỉ định rõ ràng file keystore dùng cho việc ký ứng dụng,
-    // giúp đảm bảo mã SHA-1 luôn nhất quán.
     signingConfigs {
         getByName("debug") {
-            storeFile = file("../../keystore/debug.keystore") // Đường dẫn tương đối đến file keystore
+            storeFile = file("../../keystore/debug.keystore")
             storePassword = "android"
             keyAlias = "androiddebugkey"
             keyPassword = "android"
         }
     }
-    // <<< THÊM MỚI KẾT THÚC >>>
 
     defaultConfig {
         applicationId = "com.example.job_finder_app"

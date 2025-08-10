@@ -10,6 +10,9 @@ import '../../widgets/nav_helper.dart';
 import '../../widgets/main_bottom_nav_bar.dart';
 import '../../../screens/profile/setting_screen.dart';
 
+import 'package:provider/provider.dart';
+import '../../providers/theme_provider.dart'; // Import theme provider
+
 class HomePageProfile extends StatefulWidget {
   const HomePageProfile({super.key});
 
@@ -38,18 +41,35 @@ class _HomePageProfileState extends State<HomePageProfile> {
 
   @override
   Widget build(BuildContext context) {
+    // <<< THÊM MỚI >>> Lấy themeProvider để sử dụng
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
-
+        backgroundColor: Colors.white, // Lưu ý: Màu này sẽ không còn tác dụng khi ở dark mode
         elevation: 0,
-        leading: const SizedBox.shrink(), // Ẩn nút back mặc định
+        leading: const SizedBox.shrink(),
         title: const Text(
           'Của tôi',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         actions: [
+          // <<< THÊM MỚI BẮT ĐẦU >>>
+          // Nút bấm chuyển đổi theme
+          IconButton(
+            icon: Icon(
+              // Thay đổi icon dựa trên theme hiện tại
+              themeProvider.isDarkMode ? Icons.wb_sunny_outlined : Icons.nightlight_round,
+              color: Colors.black, // Tạm thời để màu đen
+            ),
+            onPressed: () {
+              // Gọi hàm toggleTheme khi nhấn nút
+              Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
+            },
+          ),
+          // <<< THÊM MỚI KẾT THÚC >>>
+          
           IconButton(
             icon: const Icon(Icons.headset_mic_outlined, color: Colors.black),
             onPressed: () {

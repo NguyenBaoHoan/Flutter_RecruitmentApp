@@ -3,6 +3,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:job_finder_app/services/user_preferences_service.dart';
 import '../models/user_model.dart'; // Giữ nguyên model User của bạn
+import 'package:flutter/services.dart';
 
 // Class nhỏ để đóng gói kết quả đăng nhập (user và token)
 class AuthResult {
@@ -16,6 +17,7 @@ class AuthService {
   // <<< GOOGLE SIGN-IN >>>
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: ['email'],
+    serverClientId: '6579631510-ee6ofdl2djag0ghvuhgck7e5mknei6nf.apps.googleusercontent.com',
   );
 
   // URL tới backend 
@@ -27,43 +29,47 @@ class AuthService {
   /// Phương thức đăng nhập bằng Google
   Future<AuthResult?> signInWithGoogle() async {
     try {
-      // 1. Bắt đầu quá trình đăng nhập với Google
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
         print('Đăng nhập Google đã bị hủy.');
-        return null; // Người dùng đã hủy
+        return null;
       }
 
-      // 2. Lấy ID Token
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final String? idToken = googleAuth.idToken;
 
       if (idToken == null) {
-        throw Exception('Không lấy được Google ID Token.');
+        // Trường hợp này hiếm khi xảy ra nếu googleUser không null, nhưng vẫn kiểm tra
+        throw Exception('Không lấy được Google ID Token sau khi xác thực.');
       }
 
-      // 3. Gửi ID Token lên backend để xác thực
+      // Gửi token lên backend... (code này giữ nguyên)
       final response = await http.post(
-        Uri.parse('$_baseUrl/google'), // Endpoint /google
+        Uri.parse('$_baseUrl/google'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'token': idToken}),
       );
 
       if (response.statusCode == 200) {
         final responseBody = jsonDecode(response.body);
-        
-        // Phân tích response từ backend { "accessToken": "...", "user": { ... } }
         final User user = User.fromJson(responseBody['user']);
         final String accessToken = responseBody['accessToken'];
-
         return AuthResult(user: user, accessToken: accessToken);
       } else {
         print('Lỗi từ backend: ${response.statusCode} - ${response.body}');
-        await _googleSignIn.signOut(); // Đăng xuất nếu backend lỗi
+        await _googleSignIn.signOut();
         return null;
       }
+    } 
+    // <<< BẮT LỖI CHI TIẾT Ở ĐÂY >>>
+    on PlatformException catch (e) {
+      print('!!! LỖI PlatformException KHI ĐĂNG NHẬP GOOGLE:');
+      print('    Mã lỗi (code): ${e.code}'); 
+      print('    Thông báo (message): ${e.message}');
+      print('    Chi tiết (details): ${e.details}');
+      return null;
     } catch (e) {
-      print('Lỗi trong quá trình signInWithGoogle: $e');
+      print('!!! Lỗi chung trong quá trình signInWithGoogle: $e');
       return null;
     }
   }
