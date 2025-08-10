@@ -44,6 +44,8 @@ dependencies:
 
   # Package cho Sáng/Tối
   provider: ^6.1.2
+  file_picker: ^10.2.1
+  syncfusion_flutter_pdfviewer: ^30.2.4
 
 dev_dependencies:
   flutter_test:

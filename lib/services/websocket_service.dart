@@ -42,7 +42,7 @@ class WebSocketService {
     print("Connecting to WebSocket...");
     _stompClient = StompClient(
       config: StompConfig(
-        url: 'ws://10.0.2.2:8080/ws', 
+        url: 'ws://192.168.1.2:8080/ws', // Thay bằng IP của bạn nếu cần
         onConnect: _onConnectCallback,
         onDisconnect: _onDisconnectCallback,
         onWebSocketError: (dynamic error) {

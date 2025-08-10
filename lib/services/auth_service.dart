@@ -19,7 +19,7 @@ class AuthService {
     required String email,
     required String password,
   }) async {
-    final url = Uri.parse('$_baseUrl/register'); // Giả sử _baseUrl đã có
+    final url = Uri.parse('$_baseUrl/register');
     try {
       final response = await http.post(
         url,
@@ -43,7 +43,9 @@ class AuthService {
   }
 
   /// Phương thức đăng nhập bằng email/mật khẩu
+  /// Phương thức đăng nhập bằng email/mật khẩu
   Future<User?> login(String email, String password) async {
+    // ✅ SỬA: Sử dụng _baseUrl thay vì hardcode URL
     final url = Uri.parse('$_baseUrl/login');
     final response = await http.post(
       url,
