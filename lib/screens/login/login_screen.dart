@@ -8,6 +8,7 @@ import 'package:country_code_picker/country_code_picker.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'auth_gate.dart';
 import '../../services/user_preferences_service.dart';
+import 'package:job_finder_app/screens/login/register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -256,7 +257,29 @@ class _LoginScreenState extends State<LoginScreen> {
                   }),
                 ],
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
+
+              // Nút điều hướng đến trang Đăng ký
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("Chưa có tài khoản?"),
+                  TextButton(
+                    onPressed: () {
+                      // Điều hướng đến màn hình đăng ký
+                      // Giả sử bạn có file register_screen.dart
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                      );
+                    },
+                    child: Text(
+                      'Đăng ký ngay',
+                      style: TextStyle(color: Colors.blue.shade700),
+                    ),
+                  ),
+                ],
+              ),
 
               // 8. Checkbox điều khoản và chính sách
               Row(

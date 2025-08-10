@@ -80,7 +80,7 @@ class MyApp extends StatelessWidget {
           ),
 
           debugShowCheckedModeBanner: false,
-          home: const HomePageProfile(),
+          home: const LoginScreen(),
           initialRoute: '/',
           routes: {
             '/recruiter-home': (context) => const RecruiterHomeScreen(),

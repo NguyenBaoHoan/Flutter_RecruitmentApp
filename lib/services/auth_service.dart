@@ -26,6 +26,40 @@ class AuthService {
   final String _baseUrl = 'http://10.0.2.2:8080/api/v1/auth';
 
 
+  /// <<< THÊM MỚI >>> Phương thức đăng ký tài khoản mới
+  Future<bool> register({
+    required String name,
+    required String email,
+    required String password,
+  }) async {
+    final url = Uri.parse('$_baseUrl/register'); // Giả sử _baseUrl đã có
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'name': name,
+          'email': email,
+          'password': password,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print('Đăng ký thành công!');
+        return true;
+      } else {
+        // In ra lỗi từ backend để dễ debug
+        print('Đăng ký thất bại: ${response.statusCode}');
+        print('Nội dung lỗi: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print('Lỗi khi gọi API đăng ký: $e');
+      return false;
+    }
+  }
+
+
   /// Phương thức đăng nhập bằng Google
   Future<AuthResult?> signInWithGoogle() async {
     try {
