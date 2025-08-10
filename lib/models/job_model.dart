@@ -60,6 +60,31 @@ class Job {
     );
   }
 
+  // Factory cho dữ liệu từ API { data: { result: [...] } }
+  factory Job.fromApi(Map<String, dynamic> json) {
+    return Job(
+      id: json['id'] is int ? json['id'] as int : int.tryParse('${json['id']}'),
+      name: (json['name'] ?? '').toString(),
+      salary: (json['salary'] ?? 'Thỏa thuận').toString(),
+      location: (json['location'] ?? '').toString(),
+      experience: (json['experience'] ?? '').toString(),
+      educationLevel: (json['educationLevel'] ?? '').toString(),
+      jobType: (json['jobType'] ?? '').toString(),
+      // API không có postedDate -> fallback createdAt
+      postedDate: (json['postedDate'] ?? json['createdAt'] ?? '').toString(),
+      description: _parseStringList(json['description']),
+      requirements: _parseStringList(json['requirements']),
+      benefits: _parseStringList(json['benefits']),
+      workAddress: (json['workAddress'] ?? '').toString(),
+      // Các field công ty API chưa trả -> để rỗng
+      companyName: (json['companyName'] ?? '').toString(),
+      companyLogoAsset: (json['companyLogoAsset'] ?? '').toString(),
+      locationCompany: (json['locationCompany'] ?? '').toString(),
+      companySize: (json['companySize'] ?? '').toString(),
+      companyIndustry: (json['companyIndustry'] ?? '').toString(),
+    );
+  }
+
   // Thêm helper method
   static List<String> _parseStringList(dynamic data) {
     if (data == null) return [];
@@ -109,8 +134,11 @@ class Job {
     companyIndustry: 'Truyền thông/Báo chí/Quảng cáo',
   );
 
-  Map<String, String> toMap() {
+  Map<String, dynamic> toMap() {
+    // dùng dynamic để chứa int id
     return {
+      'id': id, // GIỮ id để điều hướng sang detail
+      'title': name,
       'name': name,
       'salary': salary,
       'location': location,
@@ -118,9 +146,31 @@ class Job {
       'educationLevel': educationLevel,
       'jobType': jobType,
       'postedDate': postedDate,
-      'description': description.join(),
-      'requirements': requirements.join(),
-      'benefits': benefits.join(),
+      'description': description, // giữ list
+      'requirements': requirements, // giữ list
+      'benefits': benefits, // giữ list
+      'workAddress': workAddress,
+      'companyName': companyName,
+      'companyLogoAsset': companyLogoAsset,
+      'locationCompany': locationCompany,
+      'companySize': companySize,
+      'companyIndustry': companyIndustry,
+    };
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'salary': salary,
+      'location': location,
+      'experience': experience,
+      'educationLevel': educationLevel,
+      'jobType': jobType,
+      'postedDate': postedDate,
+      'description': description,
+      'requirements': requirements,
+      'benefits': benefits,
       'workAddress': workAddress,
       'companyName': companyName,
       'companyLogoAsset': companyLogoAsset,

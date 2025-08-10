@@ -73,4 +73,39 @@ class JobApiService {
       throw Exception('Error loading popular jobs: $e');
     }
   }
+
+  // Lấy toàn bộ jobs (gom tất cả trang theo meta.pages)
+  Future<List<Job>> getAllJobs({int pageSize = 50}) async {
+    final List<Job> all = [];
+    int page = 1;
+    int pages = 1;
+
+    do {
+      final uri = Uri.parse('$_baseUrl/jobs?page=$page&pageSize=$pageSize');
+      final res = await http.get(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (res.statusCode != 200) {
+        throw Exception('HTTP ${res.statusCode}: ${res.body}');
+      }
+
+      final decoded = jsonDecode(res.body);
+      if (decoded is! Map<String, dynamic>) {
+        throw Exception('Unexpected response shape');
+      }
+
+      final data = decoded['data'] as Map<String, dynamic>?;
+      final meta = data?['meta'] as Map<String, dynamic>?;
+      final list = (data?['result'] as List?) ?? const [];
+
+      all.addAll(list.map<Job>((e) => Job.fromApi(e as Map<String, dynamic>)));
+
+      pages = (meta?['pages'] as num?)?.toInt() ?? 1;
+      page++;
+    } while (page <= pages);
+
+    return all;
+  }
 }

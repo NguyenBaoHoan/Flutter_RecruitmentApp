@@ -5,8 +5,8 @@ import '../../models/user_model.dart';
 import '../home/user_home_screen.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_gate.dart';
+import '../../services/user_preferences_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -31,19 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super
         .initState(); // Gọi hàm khởi tạo của lớp cha để đảm bảo mọi thứ được thiết lập đúng.
-    _checkLoginStatus(); // Kiểm tra xem người dùng đã đăng nhập chưa, nếu rồi thì chuyển sang màn hình chính.
-  }
-
-  void _checkLoginStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
-    if (isLoggedIn) {
-      // Nếu đã đăng nhập, chuyển thẳng sang Home
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const UserHomeScreen()),
-      );
-    }
+    // XÓA cuộc gọi _checkLoginStatus(); Không kiểm tra ở LoginScreen nữa
   }
 
   Future<void> _loginWithGoogle() async {
@@ -107,13 +95,9 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       // Lưu thông tin đăng nhập và thông tin người dùng
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('isLoggedIn', true);
-      await prefs.setString('user_name', user.name);
-      await prefs.setString('user_email', user.email);
-      await prefs.setString('user_id', user.id.toString());
+      await UserPreferencesService.saveUser(user);
+      await UserPreferencesService.setIsLoggedIn(true);
 
-      //if login success, go to home screen
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const AuthGate()),
