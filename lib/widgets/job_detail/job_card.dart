@@ -1,21 +1,51 @@
 // lib/widgets/job_detail/job_card.dart
 
 import 'package:flutter/material.dart';
+import '../../models/job_model.dart';
 import '../../screens/job_detail/job_detail_screen.dart';
 
 class JobCard extends StatelessWidget {
-  final Map<String, String> job;
+  final Map<String, dynamic> job; // vẫn giữ Map theo cấu trúc hiện tại
 
-  const JobCard({Key? key, required this.job}) : super(key: key);
+  const JobCard({super.key, required this.job});
+
+  Job _toJob(Map<String, dynamic> m) {
+    List<String> listOf(dynamic v) {
+      if (v == null) return const <String>[];
+      if (v is List) return v.map((e) => e.toString()).toList();
+      return <String>[v.toString()];
+    }
+
+    return Job(
+      id: (m['id'] is int) ? m['id'] as int : int.tryParse('${m['id']}'),
+      name: (m['title'] ?? m['name'] ?? '').toString(),
+      salary: (m['salary'] ?? '').toString(),
+      location: (m['location'] ?? '').toString(),
+      experience: (m['experience'] ?? '').toString(),
+      educationLevel: (m['educationLevel'] ?? '').toString(),
+      jobType: (m['jobType'] ?? '').toString(),
+      postedDate: (m['postedDate'] ?? '').toString(),
+      description: listOf(m['description']),
+      requirements: listOf(m['requirements']),
+      benefits: listOf(m['benefits']),
+      workAddress: (m['workAddress'] ?? '').toString(),
+      companyName: (m['companyName'] ?? m['company'] ?? '').toString(),
+      companyLogoAsset: (m['companyLogoAsset'] ?? '').toString(),
+      locationCompany: (m['locationCompany'] ?? '').toString(),
+      companySize: (m['companySize'] ?? '').toString(),
+      companyIndustry: (m['companyIndustry'] ?? '').toString(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // Navigate to job detail screen
+        final jobModel = _toJob(job);
+        print('🟣 [JOB CARD] Tap -> jobId=${jobModel.id}, name=${jobModel.name}');
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => JobDetailScreen(job: job)),
+          MaterialPageRoute(builder: (_) => JobDetailScreen(job: jobModel)),
         );
       },
       child: Container(

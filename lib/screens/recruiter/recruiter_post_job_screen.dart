@@ -73,19 +73,21 @@ class _RecruiterPostJobScreenState extends State<RecruiterPostJobScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // <<< THÊM MỚI >>> Lấy theme để sử dụng
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F7),
+      // <<< SỬA ĐỔI >>> Xóa màu nền cố định
       appBar: AppBar(
         title: Text(
           widget.initialJob == null
               ? "Đăng một công việc mới"
               : "Chỉnh sửa thông tin công việc",
         ),
-        backgroundColor: Colors.white,
+        // <<< SỬA ĐỔI >>> Xóa các màu cố định, AppBar sẽ tự động đổi màu
         elevation: 1,
-        iconTheme: const IconThemeData(color: Colors.black),
-        titleTextStyle: const TextStyle(
-          color: Colors.black,
+        titleTextStyle: TextStyle(
+          color: theme.textTheme.titleLarge?.color, // Lấy màu từ theme
           fontWeight: FontWeight.bold,
           fontSize: 20,
         ),
@@ -96,9 +98,10 @@ class _RecruiterPostJobScreenState extends State<RecruiterPostJobScreen> {
           key: _formKey,
           child: ListView(
             children: [
-              _buildCoolTitle(),
+              _buildCoolTitle(context), // <<< SỬA ĐỔI >>> Truyền context
               const SizedBox(height: 24),
               _buildTextField(
+                context: context, // <<< SỬA ĐỔI >>> Truyền context
                 label: "Chức danh/Vị trí công việc",
                 initialValue: _title,
                 onSaved: (v) => _title = v ?? '',
@@ -108,6 +111,7 @@ class _RecruiterPostJobScreenState extends State<RecruiterPostJobScreen> {
               ),
               const SizedBox(height: 18),
               _buildTextField(
+                context: context, // <<< SỬA ĐỔI >>> Truyền context
                 label: "Tên công ty",
                 initialValue: _company,
                 onSaved: (v) => _company = v ?? '',
@@ -115,7 +119,8 @@ class _RecruiterPostJobScreenState extends State<RecruiterPostJobScreen> {
                     v == null || v.trim().isEmpty ? "Nhập tên công ty" : null,
               ),
               const SizedBox(height: 18),
-              _buildTextField(
+               _buildTextField(
+                context: context, // <<< SỬA ĐỔI >>> Truyền context
                 label: "Mức lương",
                 initialValue: _salary,
                 onSaved: (v) => _salary = v ?? '',
@@ -124,6 +129,7 @@ class _RecruiterPostJobScreenState extends State<RecruiterPostJobScreen> {
               ),
               const SizedBox(height: 18),
               _buildTextField(
+                context: context, // <<< SỬA ĐỔI >>> Truyền context
                 label: "Địa điểm làm việc",
                 initialValue: _location,
                 onSaved: (v) => _location = v ?? '',
@@ -131,7 +137,7 @@ class _RecruiterPostJobScreenState extends State<RecruiterPostJobScreen> {
                     v == null || v.trim().isEmpty ? "Nhập địa điểm" : null,
               ),
               const SizedBox(height: 18),
-              _buildDescriptionField(),
+              _buildDescriptionField(context), // <<< SỬA ĐỔI >>> Truyền context
               const SizedBox(height: 18),
               _buildDateInput(context),
               const SizedBox(height: 32),
@@ -139,13 +145,14 @@ class _RecruiterPostJobScreenState extends State<RecruiterPostJobScreen> {
                 width: double.infinity,
                 height: 48,
                 child: ElevatedButton(
+                  // <<< SỬA ĐỔI >>> Nút sẽ tự động lấy màu từ theme
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1976D2),
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: theme.colorScheme.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     textStyle: const TextStyle(
-                      color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.2,
@@ -192,19 +199,19 @@ class _RecruiterPostJobScreenState extends State<RecruiterPostJobScreen> {
     );
   }
 
-  Widget _buildCoolTitle() {
+  Widget _buildCoolTitle(BuildContext context) { // <<< SỬA ĐỔI >>> Nhận context
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Icon(Icons.post_add_rounded, size: 48, color: Colors.blue[600]),
+        Icon(Icons.post_add_rounded, size: 48, color: theme.colorScheme.primary), // <<< SỬA ĐỔI >>>
         const SizedBox(height: 8),
         const Text(
           "Điền thông tin tuyển dụng thật chi tiết nhé!",
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
+          ), // <<< SỬA ĐỔI >>> Xóa màu cố định
           textAlign: TextAlign.center,
         ),
       ],
@@ -212,32 +219,39 @@ class _RecruiterPostJobScreenState extends State<RecruiterPostJobScreen> {
   }
 
   Widget _buildTextField({
+    required BuildContext context, // <<< SỬA ĐỔI >>> Nhận context
     required String label,
     required void Function(String?) onSaved,
     required String? Function(String?) validator,
     String? initialValue,
   }) {
+    final theme = Theme.of(context);
+    final borderSide = BorderSide(color: theme.dividerColor, width: 1);
+    final focusedBorderSide = BorderSide(color: theme.colorScheme.primary, width: 2);
+    final borderRadius = BorderRadius.circular(14);
+    
     return TextFormField(
       initialValue: initialValue,
       decoration: InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: Colors.white,
+        // <<< SỬA ĐỔI >>> Dùng màu card từ theme
+        fillColor: theme.cardColor,
         contentPadding: const EdgeInsets.symmetric(
           vertical: 16,
           horizontal: 16,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFD8D8D8), width: 1),
+          borderRadius: borderRadius,
+          borderSide: borderSide,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFD8D8D8), width: 1),
+          borderRadius: borderRadius,
+          borderSide: borderSide,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+          borderRadius: borderRadius,
+          borderSide: focusedBorderSide,
         ),
       ),
       style: const TextStyle(fontSize: 15),
@@ -246,7 +260,12 @@ class _RecruiterPostJobScreenState extends State<RecruiterPostJobScreen> {
     );
   }
 
-  Widget _buildDescriptionField() {
+  Widget _buildDescriptionField(BuildContext context) { // <<< SỬA ĐỔI >>> Nhận context
+    final theme = Theme.of(context);
+    final borderSide = BorderSide(color: theme.dividerColor, width: 1);
+    final focusedBorderSide = BorderSide(color: theme.colorScheme.primary, width: 2);
+    final borderRadius = BorderRadius.circular(14);
+
     return TextFormField(
       controller: _descriptionController,
       maxLines: 4,
@@ -254,23 +273,14 @@ class _RecruiterPostJobScreenState extends State<RecruiterPostJobScreen> {
       decoration: InputDecoration(
         labelText: "Mô tả công việc",
         filled: true,
-        fillColor: Colors.white,
+        fillColor: theme.cardColor,
         contentPadding: const EdgeInsets.symmetric(
           vertical: 16,
           horizontal: 16,
         ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFD8D8D8), width: 1),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFD8D8D8), width: 1),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
-        ),
+        border: OutlineInputBorder(borderRadius: borderRadius, borderSide: borderSide),
+        enabledBorder: OutlineInputBorder(borderRadius: borderRadius, borderSide: borderSide),
+        focusedBorder: OutlineInputBorder(borderRadius: borderRadius, borderSide: focusedBorderSide),
       ),
       style: const TextStyle(fontSize: 15),
       validator: (value) =>
@@ -279,33 +289,29 @@ class _RecruiterPostJobScreenState extends State<RecruiterPostJobScreen> {
   }
 
   Widget _buildDateInput(BuildContext context) {
+    final theme = Theme.of(context);
+    final borderSide = BorderSide(color: theme.dividerColor, width: 1);
+    final focusedBorderSide = BorderSide(color: theme.colorScheme.primary, width: 2);
+    final borderRadius = BorderRadius.circular(14);
+
     return TextFormField(
       controller: _dateController,
       keyboardType: TextInputType.datetime,
       decoration: InputDecoration(
         labelText: "Hạn nộp hồ sơ (dd/MM/yyyy)",
         filled: true,
-        fillColor: Colors.white,
+        fillColor: theme.cardColor,
         suffixIcon: IconButton(
-          icon: const Icon(Icons.calendar_today, color: Color(0xFF1976D2)),
+          icon: Icon(Icons.calendar_today, color: theme.colorScheme.primary),
           onPressed: () => _showDatePicker(context),
         ),
         contentPadding: const EdgeInsets.symmetric(
           vertical: 16,
           horizontal: 16,
         ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFD8D8D8), width: 1),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFD8D8D8), width: 1),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
-        ),
+        border: OutlineInputBorder(borderRadius: borderRadius, borderSide: borderSide),
+        enabledBorder: OutlineInputBorder(borderRadius: borderRadius, borderSide: borderSide),
+        focusedBorder: OutlineInputBorder(borderRadius: borderRadius, borderSide: focusedBorderSide),
       ),
       style: const TextStyle(fontSize: 15),
       validator: (value) {

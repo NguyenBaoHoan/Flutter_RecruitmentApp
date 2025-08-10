@@ -19,6 +19,9 @@ class _MyWorksPageState extends State<MyWorksPage> {
   List<dynamic> images = [];
   final int maxImages = 12;
 
+  // Getter để tính số lượng ảnh hiện tại
+  int get currentCount => images.length;
+
   @override
   void initState() {
     super.initState();
@@ -27,7 +30,12 @@ class _MyWorksPageState extends State<MyWorksPage> {
 
   Future<void> _init() async {
     final prefs = await SharedPreferences.getInstance();
-    userId = int.tryParse(prefs.getString('user_id') ?? '');
+
+    // ✅ SỬA: Chỉ dùng getInt vì user_id được lưu dưới dạng int
+    userId = prefs.getInt('user_id');
+
+    print('DEBUG: userId from prefs: $userId');
+
     if (userId != null) {
       await _loadPortfolio();
     }
@@ -102,6 +110,17 @@ class _MyWorksPageState extends State<MyWorksPage> {
     }
   }
 
+  void _openImageViewer(int startIndex) {
+    final urls = images.map((e) => _buildImageUrl(e)).toList();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) =>
+            _FullImageViewer(images: urls, initialIndex: startIndex),
+      ),
+    );
+  }
+
   void _showSnack(String msg) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
@@ -115,18 +134,22 @@ class _MyWorksPageState extends State<MyWorksPage> {
 
   @override
   Widget build(BuildContext context) {
-    final currentCount = images.length;
+    // Lấy theme hiện tại để sử dụng
+    final theme = Theme.of(context);
+
     return Scaffold(
+      // AppBar sẽ tự động đổi màu theo theme
       appBar: AppBar(
-        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back_ios_new),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
         title: const Text(
           'Cập nhật sản phẩm cá nhân',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -141,22 +164,23 @@ class _MyWorksPageState extends State<MyWorksPage> {
       body: loading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Thông báo về nội dung tải lên
                   const Text(
-                    'Nội dung tải lên không được chứa thông tin liên hệ cá nhân (số điện thoại, email, mã QR...).',
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                    'Nội dung tải lên không được chứa thông tin nhạy cảm và thông tin liên hệ cá nhân, chẳng hạn như mã QR, số điện thoại hoặc địa chỉ email, v.v.',
+                    // Text sẽ tự động đổi màu
+                    style: TextStyle(fontSize: 14),
                   ),
                   const SizedBox(height: 20),
-                  Text(
+
+                  // Phần thông tin tác phẩm
+                  const Text(
                     'Thông tin tác phẩm',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade800,
-                    ),
+                    // Text sẽ tự động đổi màu
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
                   Card(
@@ -164,7 +188,7 @@ class _MyWorksPageState extends State<MyWorksPage> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     elevation: 0,
-                    color: Colors.white,
+                    // Card sẽ tự động đổi màu
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
                       child: TextField(
@@ -174,10 +198,10 @@ class _MyWorksPageState extends State<MyWorksPage> {
                         decoration: InputDecoration(
                           hintText:
                               'Giới thiệu ngắn gọn về các dự án / tác phẩm...',
-                          hintStyle: TextStyle(color: Colors.grey.shade400),
+                          // hintStyle sẽ tự động đổi màu
+                          hintStyle: TextStyle(color: theme.hintColor),
                           border: InputBorder.none,
                           counterText: '${descController.text.length}/2000',
-                          counterStyle: TextStyle(color: Colors.grey.shade500),
                         ),
                         onChanged: (_) => setState(() {}),
                       ),
@@ -187,6 +211,10 @@ class _MyWorksPageState extends State<MyWorksPage> {
                     alignment: Alignment.centerRight,
                     child: ElevatedButton(
                       onPressed: savingDesc ? null : _saveDescription,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.colorScheme.primary,
+                        foregroundColor: theme.colorScheme.onPrimary,
+                      ),
                       child: savingDesc
                           ? const SizedBox(
                               width: 18,
@@ -197,16 +225,18 @@ class _MyWorksPageState extends State<MyWorksPage> {
                     ),
                   ),
                   const SizedBox(height: 20),
+
+                  // Phần tải hình ảnh lên
                   Text(
                     'Tải hình ảnh lên ($currentCount/$maxImages)',
-                    style: TextStyle(
+                    // Text sẽ tự động đổi màu
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade800,
                     ),
                   ),
                   const SizedBox(height: 10),
-                  _buildImageGrid(),
+                  _buildImageGrid(theme),
                   const SizedBox(height: 90),
                 ],
               ),
@@ -214,38 +244,50 @@ class _MyWorksPageState extends State<MyWorksPage> {
     );
   }
 
-  Widget _buildImageGrid() {
+  Widget _buildImageGrid(ThemeData theme) {
     if (images.isEmpty) {
       return Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 0,
-        child: SizedBox(
-          width: double.infinity,
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.photo_library_outlined,
-                  size: 60,
-                  color: Colors.grey.shade400,
+        // Card sẽ tự động đổi màu
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              // Nút thêm ảnh
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  // Dùng màu viền từ theme
+                  border: Border.all(
+                    color: theme.dividerColor,
+                    style: BorderStyle.solid,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  'Chưa có hình ảnh nào',
-                  style: TextStyle(color: Colors.grey.shade600),
+                child: IconButton(
+                  // Icon sẽ tự động đổi màu
+                  icon: const Icon(Icons.add, size: 40),
+                  onPressed: _addImages,
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Nhấn nút dấu + để thêm ảnh',
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Chưa có hình ảnh nào',
+                style: TextStyle(color: theme.hintColor),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Nhấn nút dấu + để thêm ảnh',
+                style: TextStyle(fontSize: 12, color: theme.hintColor),
+              ),
+            ],
           ),
         ),
       );
     }
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -303,17 +345,6 @@ class _MyWorksPageState extends State<MyWorksPage> {
       },
     );
   }
-
-  void _openImageViewer(int startIndex) {
-    final urls = images.map((e) => _buildImageUrl(e)).toList();
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) =>
-            _FullImageViewer(images: urls, initialIndex: startIndex),
-      ),
-    );
-  }
 }
 
 class _FullImageViewer extends StatefulWidget {
@@ -360,26 +391,14 @@ class _FullImageViewerState extends State<_FullImageViewer> {
         controller: _page,
         onPageChanged: (i) => setState(() => current = i),
         itemCount: widget.images.length,
-        itemBuilder: (_, i) {
+        itemBuilder: (ctx, i) {
           final url = widget.images[i];
-          return GestureDetector(
-            onVerticalDragEnd: (_) => Navigator.pop(context),
-            child: InteractiveViewer(
-              minScale: 0.7,
-              maxScale: 4,
-              child: Center(
-                child: Hero(
-                  tag: 'pf_$i',
-                  child: Image.network(
-                    url,
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => const Icon(
-                      Icons.broken_image,
-                      size: 80,
-                      color: Colors.white54,
-                    ),
-                  ),
-                ),
+          return InteractiveViewer(
+            child: Image.network(
+              url,
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => const Center(
+                child: Icon(Icons.broken_image, color: Colors.grey),
               ),
             ),
           );

@@ -5,12 +5,15 @@ class CareerExpectationsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // <<< THÊM MỚI >>> Lấy theme hiện tại để sử dụng cho các màu sắc
+    final theme = Theme.of(context);
+
     return Scaffold(
+      // <<< SỬA ĐỔI >>> AppBar sẽ tự động đổi màu theo theme
       appBar: AppBar(
-        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () {
             Navigator.pop(context); // Quay lại màn hình trước
           },
@@ -18,7 +21,6 @@ class CareerExpectationsPage extends StatelessWidget {
         title: const Text(
           'Quản lý mục tiêu',
           style: TextStyle(
-            color: Colors.black,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -35,28 +37,27 @@ class CareerExpectationsPage extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'Thêm vị trí mong muốn của bạn',
+                    // <<< SỬA ĐỔI >>> Xóa màu cố định
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade800,
                     ),
                   ),
                 ),
                 Text(
                   '0/3',
+                  // <<< SỬA ĐỔI >>> Xóa màu cố định
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.grey.shade600,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 5),
-            Text(
-              'Thêm nhiều kỳ vọng tìm kiếm việc làm để có được cơ hội việc làm công nghệ cao chính xác hơn',
+            Text('Thêm nhiều kỳ vọng tìm kiếm việc làm để có được cơ hội việc làm công nghệ cao chính xác hơn',
+              // <<< SỬA ĐỔI >>> Xóa màu cố định
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey.shade600,
               ),
             ),
             const SizedBox(height: 20),
@@ -67,13 +68,15 @@ class CareerExpectationsPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               elevation: 0,
-              color: Colors.white,
+              // <<< SỬA ĐỔI >>> Xóa màu trắng cố định, Card sẽ tự lấy màu từ theme
               child: ListTile(
                 title: const Text(
                   'Sẵn sàng nhận việc ngay',
-                  style: TextStyle(fontSize: 16, color: Colors.black87),
+                  // <<< SỬA ĐỔI >>> Xóa màu cố định
+                  style: TextStyle(fontSize: 16),
                 ),
-                trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                // <<< SỬA ĐỔI >>> Xóa màu cố định
+                trailing: const Icon(Icons.chevron_right),
                 onTap: () {
                   // Xử lý khi nhấn vào mục này
                 },
@@ -88,11 +91,13 @@ class CareerExpectationsPage extends StatelessWidget {
           onPressed: () {
             // Xử lý khi nhấn nút "Thêm vào (0/3)"
           },
+          // <<< SỬA ĐỔI >>> Nút sẽ tự động lấy màu từ theme
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blueAccent, // Màu nền của nút
+            backgroundColor: theme.colorScheme.primary, // Lấy màu chính của theme
+            foregroundColor: theme.colorScheme.onPrimary, // Lấy màu chữ phù hợp
             padding: const EdgeInsets.symmetric(vertical: 15),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12), // Bo tròn góc nút
+              borderRadius: BorderRadius.circular(12),
             ),
           ),
           child: const Text(
@@ -100,7 +105,6 @@ class CareerExpectationsPage extends StatelessWidget {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
             ),
           ),
         ),

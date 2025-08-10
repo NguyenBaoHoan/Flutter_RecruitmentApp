@@ -1,12 +1,14 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/auth_service.dart';
 import '../../models/user_model.dart';
 import '../home/user_home_screen.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_gate.dart';
+import '../../services/user_preferences_service.dart';
+import 'package:job_finder_app/screens/login/register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -31,17 +33,51 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super
         .initState(); // Gọi hàm khởi tạo của lớp cha để đảm bảo mọi thứ được thiết lập đúng.
-    _checkLoginStatus(); // Kiểm tra xem người dùng đã đăng nhập chưa, nếu rồi thì chuyển sang màn hình chính.
+    // XÓA cuộc gọi _checkLoginStatus(); Không kiểm tra ở LoginScreen nữa
   }
 
-  void _checkLoginStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
-    if (isLoggedIn) {
-      // Nếu đã đăng nhập, chuyển thẳng sang Home
-      Navigator.pushReplacement(
+  Future<void> _loginWithGoogle() async {
+    // Hiển thị vòng xoay loading để người dùng biết app đang xử lý
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    final authResult = await _authService.signInWithGoogle();
+
+    // Ẩn vòng xoay loading
+    Navigator.of(context).pop();
+
+    if (authResult != null) {
+      // Đăng nhập thành công!
+      print('Đăng nhập Google thành công!');
+      print('Tên người dùng: ${authResult.user.name}');
+      print('Access Token của backend: ${authResult.accessToken}');
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Đăng nhập thành công! Xin chào ${authResult.user.name}')),
+      );
+
+      // Lưu lại token và trạng thái đăng nhập
+      // (Quan trọng: Lưu accessToken của backend, không phải của Google)
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', true);
+      await prefs.setString('accessToken', authResult.accessToken);
+      await prefs.setString('user_name', authResult.user.name);
+      await prefs.setString('user_email', authResult.user.email);
+      
+      // Chuyển sang màn hình chính
+      Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => const UserHomeScreen()),
+        MaterialPageRoute(builder: (context) => const AuthGate()),
+        (route) => false,
+      );
+
+    } else {
+      // Đăng nhập thất bại
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Đăng nhập Google thất bại! Vui lòng thử lại.')),
       );
     }
   }
@@ -61,13 +97,9 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       // Lưu thông tin đăng nhập và thông tin người dùng
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('isLoggedIn', true);
-      await prefs.setString('user_name', user.name);
-      await prefs.setString('user_email', user.email);
-      await prefs.setString('user_id', user.id.toString());
+      await UserPreferencesService.saveUser(user);
+      await UserPreferencesService.setIsLoggedIn(true);
 
-      //if login success, go to home screen
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const AuthGate()),
@@ -211,9 +243,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     // TODO: Login with Email
                   }),
                   const SizedBox(width: 20),
-                  _buildSocialButton(FontAwesomeIcons.google, () {
-                    // TODO: Login with Google
-                  }),
+                  _buildSocialButton(FontAwesomeIcons.google, _loginWithGoogle), 
+                  // TODO: Login with Google
+                  
                   const SizedBox(width: 20),
                   _buildSocialButton(FontAwesomeIcons.comment, () {
                     // TODO: Login with Zalo - Cần icon Zalo riêng
@@ -225,7 +257,29 @@ class _LoginScreenState extends State<LoginScreen> {
                   }),
                 ],
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
+
+              // Nút điều hướng đến trang Đăng ký
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("Chưa có tài khoản?"),
+                  TextButton(
+                    onPressed: () {
+                      // Điều hướng đến màn hình đăng ký
+                      // Giả sử bạn có file register_screen.dart
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                      );
+                    },
+                    child: Text(
+                      'Đăng ký ngay',
+                      style: TextStyle(color: Colors.blue.shade700),
+                    ),
+                  ),
+                ],
+              ),
 
               // 8. Checkbox điều khoản và chính sách
               Row(
@@ -277,7 +331,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 print('Navigate to Privacy Policy');
                               },
                           ),
-                          const TextSpan(text: ' của goodboss.'),
+                          const TextSpan(text: ' của Job Hunter.'),
                         ],
                       ),
                     ),

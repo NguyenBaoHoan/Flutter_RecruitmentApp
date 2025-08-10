@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "650238238213",
+    "project_id": "job-hunter-cf3be",
+    "storage_bucket": "job-hunter-cf3be.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:650238238213:android:561894778175b88defc66c",
+        "android_client_info": {
+          "package_name": "com.example.job_finder_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC9b1Wmj7MBSx6ywV4HRGnihrl5pbvhHWU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

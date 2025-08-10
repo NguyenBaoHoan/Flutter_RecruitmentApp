@@ -24,31 +24,53 @@ class _AttachCVPageState extends State<AttachCVPage> {
 
   // Hàm tải CV hiện tại từ backend
   Future<void> _loadCurrentUserCV() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? userIdString = prefs.getString('user_id');
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    if (userIdString != null) {
-      currentUserId = int.tryParse(userIdString);
+      print('=== DEBUG SharedPreferences ===');
+      print('All keys in prefs: ${prefs.getKeys()}');
+
+      // ✅ SỬA: Chỉ dùng getInt vì user_id được lưu dưới dạng int
+      currentUserId = prefs.getInt('user_id');
+
+      print('user_id from prefs: $currentUserId');
+
       if (currentUserId != null) {
+        print('✅ Found user_id: $currentUserId');
+
         // Gọi API lấy tên file CV
         String? cvFileName = await FileService.getCurrentUserCV(currentUserId!);
+        print('CV fileName from API: $cvFileName');
+
         if (cvFileName != null && cvFileName.isNotEmpty) {
           setState(() {
-            // GIỮ NGUYÊN tên file đầy đủ (bao gồm timestamp) cho URL
             uploadedCV = cvFileName;
           });
         }
+      } else {
+        print('❌ No user_id found in SharedPreferences');
       }
+    } catch (e) {
+      print('❌ Error in _loadCurrentUserCV: $e');
     }
   }
 
   // Hàm upload CV lên backend
   Future<void> uploadCV() async {
+    // ✅ THÊM DEBUG
+    print('=== DEBUG Upload CV ===');
+    print('currentUserId: $currentUserId');
+
     if (currentUserId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Không tìm thấy thông tin người dùng!')),
-      );
-      return;
+      // ✅ THÊM: Thử load lại user từ SharedPreferences
+      await _loadCurrentUserCV();
+
+      if (currentUserId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Không tìm thấy thông tin người dùng!')),
+        );
+        return;
+      }
     }
 
     // Chọn file từ thiết bị
@@ -68,12 +90,15 @@ class _AttachCVPageState extends State<AttachCVPage> {
 
       if (uploadResult != null) {
         setState(() {
-          uploadedCV = result.files.single.name; // Hiển thị tên file vừa upload
+          uploadedCV = uploadResult; // Dùng tên file trả về từ server
           isUploading = false;
         });
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('Upload CV thành công!')));
+
+        // Reload để lấy file mới nhất
+        await _loadCurrentUserCV();
       } else {
         setState(() {
           isUploading = false;
@@ -106,17 +131,24 @@ class _AttachCVPageState extends State<AttachCVPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Lấy màu sắc từ theme hiện tại của ứng dụng
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     return Scaffold(
+      // AppBar sẽ tự động lấy màu từ theme
       appBar: AppBar(
-        backgroundColor: Colors.white,
         elevation: 0,
+        // Nút back và title sẽ tự động đổi màu theo theme
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back_ios_new),
+          onPressed: () {
+            Navigator.pop(context); // Quay lại màn hình trước
+          },
         ),
         title: const Text(
           'Đính kèm CV',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -128,17 +160,17 @@ class _AttachCVPageState extends State<AttachCVPage> {
             // Thông báo về định dạng file
             const Text(
               'Nên sử dụng tệp PDF cho CV. Các định dạng DOC, DOCX, JPG và PNG đều được hỗ trợ, kích thước không quá 20M.',
-              style: TextStyle(fontSize: 14, color: Colors.grey),
+              style: TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 20),
 
-            // Card "Tạo CV nhanh chóng" (giữ nguyên)
+            // Card "Tạo CV nhanh chóng" - Giữ nguyên màu tím đặc trưng
             Card(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
               elevation: 0,
-              color: const Color(0xFF6A5ACD),
+              color: const Color(0xFF6A5ACD), // Giữ màu tím làm điểm nhấn
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
@@ -152,7 +184,7 @@ class _AttachCVPageState extends State<AttachCVPage> {
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: Colors.white, // Chữ trắng trên nền tím
                             ),
                           ),
                           SizedBox(height: 5),
@@ -166,10 +198,17 @@ class _AttachCVPageState extends State<AttachCVPage> {
                         ],
                       ),
                     ),
-                    const Icon(
-                      Icons.insert_drive_file,
-                      size: 60,
-                      color: Colors.white,
+                    Image.network(
+                      'https://placehold.co/80x80/6A5ACD/white?text=CV',
+                      width: 80,
+                      height: 80,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Icon(
+                          Icons.insert_drive_file,
+                          size: 60,
+                          color: Colors.white,
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -184,18 +223,26 @@ class _AttachCVPageState extends State<AttachCVPage> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
-                            Icons.image_not_supported_outlined,
-                            size: 100,
-                            color: Colors.grey.shade400,
+                          Image.network(
+                            // Thay đổi màu ảnh placeholder theo theme
+                            isDarkMode
+                                ? 'https://placehold.co/200x200/303030/grey?text=No+Data'
+                                : 'https://placehold.co/200x200/white/grey?text=No+Data',
+                            width: 200,
+                            height: 200,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Icon(
+                                Icons.image_not_supported_outlined,
+                                size: 100,
+                                // Lấy màu icon từ theme
+                                color: theme.dividerColor,
+                              );
+                            },
                           ),
                           const SizedBox(height: 20),
-                          Text(
+                          const Text(
                             'Chưa có CV nào được tải lên',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey.shade600,
-                            ),
+                            style: TextStyle(fontSize: 16),
                           ),
                         ],
                       ),
@@ -250,10 +297,11 @@ class _AttachCVPageState extends State<AttachCVPage> {
         padding: const EdgeInsets.all(16.0),
         child: ElevatedButton(
           onPressed: uploadedCV == null && !isUploading ? uploadCV : null,
+          // Nút sẽ tự động lấy màu từ theme
           style: ElevatedButton.styleFrom(
-            backgroundColor: uploadedCV == null
-                ? Colors.blueAccent
-                : Colors.grey,
+            backgroundColor:
+                theme.colorScheme.primary, // Lấy màu chính của theme
+            foregroundColor: theme.colorScheme.onPrimary, // Lấy màu chữ phù hợp
             padding: const EdgeInsets.symmetric(vertical: 15),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -266,7 +314,6 @@ class _AttachCVPageState extends State<AttachCVPage> {
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
                   ),
                 ),
         ),
@@ -287,8 +334,8 @@ class _AttachCVPageState extends State<AttachCVPage> {
         child: isImage
             ? Image.network(
                 url,
-                width: 120, // Tăng từ 60 lên 120
-                height: 120, // Tăng từ 60 lên 120
+                width: 120,
+                height: 120,
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => Container(
                   width: 120,
@@ -300,13 +347,13 @@ class _AttachCVPageState extends State<AttachCVPage> {
                   child: const Icon(
                     Icons.broken_image,
                     color: Colors.grey,
-                    size: 60, // Tăng size icon
+                    size: 60,
                   ),
                 ),
               )
             : Container(
-                width: 120, // Tăng từ 60 lên 120
-                height: 120, // Tăng từ 60 lên 120
+                width: 120,
+                height: 120,
                 decoration: BoxDecoration(
                   color: ext == 'pdf'
                       ? Colors.red.shade50
@@ -315,7 +362,7 @@ class _AttachCVPageState extends State<AttachCVPage> {
                 ),
                 child: Icon(
                   ext == 'pdf' ? Icons.picture_as_pdf : Icons.insert_drive_file,
-                  size: 60, // Tăng từ 30 lên 60
+                  size: 60,
                   color: ext == 'pdf' ? Colors.red : Colors.blue,
                 ),
               ),

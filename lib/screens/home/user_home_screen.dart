@@ -7,6 +7,8 @@ import '../../../models/job_model.dart';
 import '../../widgets/job_detail/job_card.dart';
 import '../choose_area/choose_area_screen.dart';
 import '../../screens/job_detail/job_detail_screen.dart';
+import '../../screens/search/search_screen.dart';
+import '../../services/job_api_service.dart';
 
 class UserHomeScreen extends StatefulWidget {
   const UserHomeScreen({Key? key}) : super(key: key);
@@ -16,81 +18,34 @@ class UserHomeScreen extends StatefulWidget {
 }
 
 class _UserHomeScreenState extends State<UserHomeScreen> {
-  // Dữ liệu mẫu
-  final List<Job> jobs = [
-    Job(
-      title: 'Nhân Viên Lễ Tân Kiêm Sale',
-      companyName: 'CÔNG TY CỔ PHẦN ĐẦU TƯ XÂY DỰNG BẤT ĐỘNG SẢN HOÀNG TRIỀU',
-      salary: '10-12 Triệu',
-      location: 'Bình Thạnh - Hồ Chí Minh',
-      postedDate: 'Hôm nay',
-      companyLogoAsset: '',
-      experience: '1-3 năm',
-      educationLevel: 'Cao đẳng',
-      jobType: 'Toàn thời gian',
-      description: ['Mô tả công việc'],
-      requirements: ['Yêu cầu công việc'],
-      benefits: ['Phúc lợi'],
-      workAddress: 'Bình Thạnh - Hồ Chí Minh',
-      locationCompany: 'Bình Thạnh - Hồ Chí Minh',
-      companySize: '50-100 nhân viên',
-      companyIndustry: 'Bất động sản',
-    ),
-    Job(
-      title: 'Chuyên Viên Kế Toán Tổng Hợp',
-      companyName: 'CÔNG TY CỔ PHẦN CÔNG NGHỆ VÀ DỊCH VỤ DỮ LIỆU SỐ TDS',
-      salary: '18-20 Triệu',
-      location: 'Cầu Giấy - Hà Nội',
-      postedDate: 'Hôm nay',
-      companyLogoAsset: '',
-      experience: '3-5 năm',
-      educationLevel: 'Đại học',
-      jobType: 'Toàn thời gian',
-      description: ['Mô tả công việc'],
-      requirements: ['Yêu cầu công việc'],
-      benefits: ['Phúc lợi'],
-      workAddress: 'Cầu Giấy - Hà Nội',
-      locationCompany: 'Cầu Giấy - Hà Nội',
-      companySize: '100-200 nhân viên',
-      companyIndustry: 'Công nghệ',
-    ),
-    Job(
-      title: 'Nhân Viên Kinh Doanh Thuốc Thủy Sản',
-      companyName: 'CÔNG TY TNHH HÓA CHẤT THỊNH THỊNH',
-      salary: 'Thỏa thuận',
-      location: 'Thủ Đức - Hồ Chí Minh',
-      postedDate: 'Hôm nay',
-      companyLogoAsset: '',
-      experience: '1-3 năm',
-      educationLevel: 'Cao đẳng',
-      jobType: 'Toàn thời gian',
-      description: ['Mô tả công việc'],
-      requirements: ['Yêu cầu công việc'],
-      benefits: ['Phúc lợi'],
-      workAddress: 'Thủ Đức - Hồ Chí Minh',
-      locationCompany: 'Thủ Đức - Hồ Chí Minh',
-      companySize: '50-100 nhân viên',
-      companyIndustry: 'Hóa chất',
-    ),
-    Job(
-      title: 'Nhân Viên Kinh Doanh',
-      companyName: 'CÔNG TY TNHH FLUMA TECH',
-      salary: 'Thỏa thuận',
-      location: 'Quận 7 - Hồ Chí Minh',
-      postedDate: 'Hôm qua',
-      companyLogoAsset: '',
-      experience: '1-3 năm',
-      educationLevel: 'Cao đẳng',
-      jobType: 'Toàn thời gian',
-      description: ['Mô tả công việc'],
-      requirements: ['Yêu cầu công việc'],
-      benefits: ['Phúc lợi'],
-      workAddress: 'Quận 7 - Hồ Chí Minh',
-      locationCompany: 'Quận 7 - Hồ Chí Minh',
-      companySize: '20-50 nhân viên',
-      companyIndustry: 'Công nghệ',
-    ),
-  ];
+  // Dùng API thay cho dữ liệu mẫu
+  final JobApiService _jobApi = JobApiService();
+  final List<Job> jobs = [];
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchJobs();
+  }
+
+  Future<void> _fetchJobs() async {
+    try {
+      final data = await _jobApi.getAllJobs();
+      setState(() {
+        jobs
+          ..clear()
+          ..addAll(data);
+        _loading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _loading = false;
+      });
+    }
+  }
 
   int _selectedIndex = 0;
 
@@ -100,8 +55,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // <<< SỬA ĐỔI >>> Xóa màu nền cố định, Scaffold sẽ tự lấy màu từ theme
     return Scaffold(
-      backgroundColor: Colors.grey[100],
       body: SafeArea(
         child: Column(
           children: [
@@ -109,12 +64,17 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
             _buildResumeAlert(),
             _buildFilterChips(),
             Expanded(
-              child: ListView.builder(
-                itemCount: jobs.length,
-                itemBuilder: (context, index) {
-                  return JobCard(job: jobs[index].toMap());
-                },
-              ),
+              child: _loading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _error != null
+                      ? Center(child: Text('Lỗi: $_error'))
+                      : ListView.builder(
+                          itemCount: jobs.length,
+                          itemBuilder: (context, index) {
+                            // Giả sử JobCard đã được tối ưu hóa
+                            return JobCard(job: jobs[index].toMap());
+                          },
+                        ),
             ),
           ],
         ),
@@ -127,29 +87,33 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   }
 
   Widget _buildTopBar() {
+    // <<< THÊM MỚI >>> Lấy theme để sử dụng
+    final theme = Theme.of(context);
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.grey[300]!),
-            ),
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ChooseAreaScreen(),
-                  ),
-                );
-              },
-              child: Row(
-                children: const [
-                  Icon(Icons.location_on_outlined, color: Colors.black54),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ChooseAreaScreen(),
+                ),
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                // <<< SỬA ĐỔI >>> Dùng màu từ theme
+                color: theme.cardColor,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: theme.dividerColor),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.location_on_outlined), // Icon sẽ tự đổi màu
                   SizedBox(width: 8),
                   Text('Khu vực'),
                 ],
@@ -166,26 +130,42 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   }
 
   Widget _buildIconButton(IconData icon) {
+    final theme = Theme.of(context);
+
     return Container(
       margin: const EdgeInsets.only(left: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        // <<< SỬA ĐỔI >>> Dùng màu từ theme
+        color: theme.cardColor,
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: IconButton(
-        icon: Icon(icon, color: Colors.black54),
-        onPressed: () {},
+        icon: Icon(icon), // Icon sẽ tự đổi màu
+        onPressed: () {
+          if (icon == Icons.search) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SearchScreen()),
+            );
+          }
+          // Xử lý các icon khác nếu cần
+        },
       ),
     );
   }
 
   Widget _buildResumeAlert() {
+    // <<< THÊM MỚI >>> Lấy theme để sử dụng
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey[800],
+        // <<< SỬA ĐỔI >>> Dùng màu phù hợp cho cả 2 chế độ
+        color: isDarkMode ? Colors.grey[800] : Colors.black87,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -194,10 +174,11 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           const SizedBox(width: 12),
           Expanded(
             child: RichText(
-              text: const TextSpan(
-                style: TextStyle(color: Colors.white, fontSize: 13),
+              text: TextSpan(
+                // <<< SỬA ĐỔI >>> Đảm bảo style chữ phù hợp
+                style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white),
                 children: [
-                  TextSpan(
+                  const TextSpan(
                     text:
                         'Sơ yếu lý lịch đã được ẩn. Mở nó ra có thể cải thiện hiệu quả tìm kiếm việc làm. ',
                   ),
@@ -206,6 +187,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       decoration: TextDecoration.underline,
+                      color: theme.colorScheme.secondary, // Dùng màu nhấn từ theme
                     ),
                   ),
                 ],
@@ -218,6 +200,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   }
 
   Widget _buildFilterChips() {
+    final theme = Theme.of(context);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Row(
@@ -225,9 +209,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           ActionChip(
             label: const Text('Việc làm hấp dẫn'),
             onPressed: () {},
-            backgroundColor: Colors.blue.withOpacity(0.1),
-            labelStyle: const TextStyle(
-              color: Colors.blue,
+            // <<< SỬA ĐỔI >>> Dùng màu từ theme
+            backgroundColor: theme.colorScheme.primaryContainer,
+            labelStyle: TextStyle(
+              color: theme.colorScheme.onPrimaryContainer,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -235,8 +220,9 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           ActionChip(
             label: const Text('Fullstack Developer'),
             onPressed: () {},
-            backgroundColor: Colors.grey[200],
-            labelStyle: TextStyle(color: Colors.grey[800]),
+            // <<< SỬA ĐỔI >>> Dùng màu từ theme
+            backgroundColor: theme.colorScheme.secondaryContainer,
+            labelStyle: TextStyle(color: theme.colorScheme.onSecondaryContainer),
           ),
         ],
       ),

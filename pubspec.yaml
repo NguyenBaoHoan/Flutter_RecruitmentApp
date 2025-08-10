@@ -33,12 +33,17 @@ dependencies:
   font_awesome_flutter: ^10.7.0 # Cung cấp bộ icon mạng xã hội
   stomp_dart_client: ^1.0.1 # <--- THÊM DÒNG NÀY
   shared_preferences: ^2.0.0
-# Thêm các package cho map
+
+  # Thêm các package cho map
   url_launcher: ^6.2.5
   geocoding: ^3.0.0
   geolocator: ^11.0.0
   path: ^1.8.3
   intl: ^0.20.2
+  google_sign_in: ^6.2.1 
+
+  # Package cho Sáng/Tối
+  provider: ^6.1.2
   file_picker: ^10.2.1
   syncfusion_flutter_pdfviewer: ^30.2.4
 
